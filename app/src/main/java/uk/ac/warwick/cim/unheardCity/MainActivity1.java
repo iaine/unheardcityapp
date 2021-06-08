@@ -1,4 +1,4 @@
-package uk.ac.warwick.cim.signalCity;
+package uk.ac.warwick.cim.unheardCity;
 //https://github.com/android/location-samples/blob/432d3b72b8c058f220416958b444274ddd186abd/LocationUpdatesForegroundService/app/src/main/java/com/google/android/gms/location/sample/locationupdatesforegroundservice/MainActivity.java
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -23,8 +23,6 @@ import android.widget.Toast;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;

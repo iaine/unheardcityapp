@@ -1,9 +1,7 @@
-package uk.ac.warwick.cim.signalCity;
+package uk.ac.warwick.cim.unheardCity;
 
-import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
@@ -23,7 +21,6 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 
 import java.util.Random;
 

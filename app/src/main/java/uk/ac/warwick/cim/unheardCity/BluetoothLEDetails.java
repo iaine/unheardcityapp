@@ -1,8 +1,7 @@
-package uk.ac.warwick.cim.signalCity;
+package uk.ac.warwick.cim.unheardCity;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanRecord;

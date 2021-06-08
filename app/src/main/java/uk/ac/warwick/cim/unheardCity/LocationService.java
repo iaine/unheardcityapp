@@ -1,4 +1,4 @@
-package uk.ac.warwick.cim.signalCity;
+package uk.ac.warwick.cim.unheardCity;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -12,18 +12,13 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 
 
 //@todo: optimise the location data. May want to run this app in the foreground

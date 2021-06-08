@@ -1,11 +1,8 @@
-package uk.ac.warwick.cim.signalCity;
+package uk.ac.warwick.cim.unheardCity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
-import android.content.Intent;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,7 +11,6 @@ import androidx.core.content.ContextCompat;
 
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.graphics.fonts.FontFamily;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -27,7 +23,6 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
-import android.view.View;
 import android.view.WindowManager;
 
 import com.google.android.gms.common.api.ResolvableApiException;
