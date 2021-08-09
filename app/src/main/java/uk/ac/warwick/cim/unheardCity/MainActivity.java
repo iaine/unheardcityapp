@@ -54,8 +54,6 @@ public class MainActivity extends AppCompatActivity {
     
     private LocationRequest locationRequest;
 
-    public Location  mCurrentLocation;
-
     private boolean requestingLocationUpdates;
 
     private File signalFile;
@@ -83,66 +81,16 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.i("LOCATION", "Location permissions");
         }
-
-        //Get permissions to find location
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-            Log.i("PERMISSIONS", "Location Permissions error");
-            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)){
-                ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-            } else {
-                ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-            }
-        }
+        checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION, "Location Permissions error");
 
         //Get permissions to write data
-        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            Log.i("PERMISSIONS", "Write permissions error");
-            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)){
-                ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-            } else {
-                ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-            }
-        }
+        checkPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, "Write permissions error");
 
         //@todo: Link both of these to a date
         //Create log file for both WiFi and Bluetooth connections
-        signalFile = new File(this.getExternalFilesDir(null), "bluetooth.txt");
-
-        if (!signalFile.exists()) {
-            try {
-                signalFile.createNewFile();
-            } catch (IOException e) {
-                Log.i("SIGNAL",e.toString());
-            }
-        }
-        //Create log file for both WiFi and Bluetooth connections
-        locationFile = new File(this.getExternalFilesDir(null), "locations.txt");
-
-        if (!locationFile.exists()) {
-            try {
-                locationFile.createNewFile();
-            } catch (IOException e) {
-                Log.i("SIGNAL",e.toString());
-            }
-        }
-
-        wifiFile = new File(this.getExternalFilesDir(null), "wifi.txt");
-
-        if (!wifiFile.exists()) {
-            try {
-                wifiFile.createNewFile();
-            } catch (IOException e) {
-                Log.i("SIGNAL",e.toString());
-            }
-        }
+        signalFile = this.createDataFile("bluetooth.txt");
+        locationFile = this.createDataFile("locations.txt");
+        wifiFile = this.createDataFile("wifi.txt");
 
         //createLocationRequest();
         // set up location
@@ -200,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 Log.i("LOCATION", "Result");
-                if (locationResult == null) {
+                if (locationResult.getLocations().isEmpty()) {
                     Log.i("LOCATION", "No results");
                     return;
                 }
@@ -260,6 +208,22 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private void checkPermissions(String accessFineLocation, String s) {
+        //Get permissions to find location
+        if (ContextCompat.checkSelfPermission(MainActivity.this, accessFineLocation)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.i("PERMISSIONS", s);
+            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                    accessFineLocation)) {
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{accessFineLocation}, 1);
+            } else {
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{accessFineLocation}, 1);
+            }
+        }
+    }
+
     protected void createLocationRequest() {
         locationRequest = LocationRequest.create();
         locationRequest.setInterval(10000);
@@ -291,29 +255,29 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("MissingPermission")
     private void startLocationUpdates() {
         try {
-
-            /*if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                Log.i("LOCATION_PERMISSIONS", "Permissions error");
-                if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
-                        Manifest.permission.ACCESS_FINE_LOCATION)){
-                    ActivityCompat.requestPermissions(MainActivity.this,
-                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-                } else {
-                    ActivityCompat.requestPermissions(MainActivity.this,
-                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-                }
-            }*/
-
             createLocationRequest();
-            Log.i("Location", "in loop");
-            Log.i("Location", locationCallback.toString());
+
             fusedLocationClient.requestLocationUpdates(locationRequest,
                     locationCallback,
                     Looper.getMainLooper());
         } catch (Exception e) {
             Log.i("LOCATION_ERROR", e.toString());
         }
+    }
+
+    private File createDataFile(String fileName) {
+        File fName = new File(this.getExternalFilesDir(null), fileName);
+
+        if (!fName.exists()) {
+            try {
+                final boolean newFile = fName.createNewFile();
+                if (!newFile) Log.i("FILE", fileName + " not created");
+            } catch (IOException e) {
+                Log.i("FILE",e.toString());
+            }
+        }
+
+        return fName;
     }
 
 
