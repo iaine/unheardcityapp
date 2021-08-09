@@ -42,7 +42,7 @@ import java.io.IOException;
  * In oreo to run a background service when the app is not running it must
  * startForegroundService(Intent)  in the activity
  * in service, make a notification low or higher. persistent.
- * and startForground (int id, Notification notification )
+ * and startForeground (int id, Notification notification )
  */
 
 public class MainActivity extends AppCompatActivity {
@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
         task.addOnFailureListener(this, new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Log.i("Location", "Fial");
+                Log.i("Location", "Final");
                 if (e instanceof ResolvableApiException) {
                     // Location settings are not satisfied, but this can be fixed
                     // by showing the user a dialog.
