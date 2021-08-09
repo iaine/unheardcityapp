@@ -16,11 +16,11 @@ import java.io.File;
 
 public class BluetoothLEDetails {
 
-    private static String TAG = "BLUETOOTH";
+    private static final String TAG = "BLUETOOTH";
 
-    private static int REQUEST_ENABLE_BT = 104;
+    private static final int REQUEST_ENABLE_BT = 104;
 
-    private File fName;
+    private final File fName;
 
     private Context mContext;
 
@@ -76,8 +76,6 @@ public class BluetoothLEDetails {
                 }
             }
         }
-
-        // private LeDeviceListAdapter leDeviceListAdapter = new LeDeviceListAdapter();
 
     // Device scan callback.
     private ScanCallback leScanCallback =
