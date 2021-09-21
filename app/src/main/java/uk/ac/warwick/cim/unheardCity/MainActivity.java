@@ -60,8 +60,6 @@ public class MainActivity extends AppCompatActivity {
 
     private File locationFile;
 
-    private File wifiFile;
-
     public MainActivity() {
         requestingLocationUpdates = true;
     }
@@ -88,11 +86,10 @@ public class MainActivity extends AppCompatActivity {
 
         //@todo: Link both of these to a date
         //Create log file for both WiFi and Bluetooth connections
-        signalFile = this.createDataFile("bluetooth.txt");
-        locationFile = this.createDataFile("locations.txt");
-        wifiFile = this.createDataFile("wifi.txt");
+        Long currentTime = System.currentTimeMillis();
+        signalFile = this.createDataFile("bluetooth_" + currentTime + ".txt");
+        locationFile = this.createDataFile("locations_" + currentTime + ".txt");
 
-        //createLocationRequest();
         // set up location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -238,7 +235,6 @@ public class MainActivity extends AppCompatActivity {
 
         if (requestingLocationUpdates) {
             startLocationUpdates();
-            new WifiDetails(this, wifiFile);
         }
     }
 
