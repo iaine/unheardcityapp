@@ -116,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
                             new FileConnection(locationFile).writeFile(data);
                         }else {
                             Log.i("LOCATION", "No Location");
+                            new BluetoothLEDetails(signalFile);
                         }
                     }
 
