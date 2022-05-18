@@ -32,10 +32,19 @@ public class WifiDetails {
 
     private WifiRttManager wifiRttManager;
 
+    private BroadcastReceiver wifiScanReceiver;
+
     public WifiDetails(Context context, File fName) {
         this.context = context;
         fileName = fName;
         this.initWifiDetails();
+    }
+
+    /**
+     * Unregister the receiver.
+     */
+    public void stopWiFiScan () {
+        context.unregisterReceiver(wifiScanReceiver);
     }
 
     private void initWifiDetails () {
@@ -43,7 +52,7 @@ public class WifiDetails {
             Log.i("WIFI", "start");
             wifiManager = (WifiManager) this.context.getSystemService(Context.WIFI_SERVICE);
 
-            BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
+            wifiScanReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context c, Intent intent) {
                     boolean success = intent.getBooleanExtra(

@@ -68,6 +68,8 @@ public class MainActivity extends AppCompatActivity {
 
     private File bluetoothFile;
 
+    private File wifiFile;
+
     private BroadcastReceiver receiver;
 
     private int Bluetooth = 0;
@@ -100,12 +102,13 @@ public class MainActivity extends AppCompatActivity {
         //Get permissions to write data
         checkPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, "Write permissions error");
 
-        //@todo: Link both of these to a date
+        //assumption that the session will be the time that the app runs.
         //Create log file for both WiFi and Bluetooth connections
         Long currentTime = System.currentTimeMillis();
         signalFile = this.createDataFile("bluetoothle_" + currentTime + ".txt");
         locationFile = this.createDataFile("locations_" + currentTime + ".txt");
         bluetoothFile = this.createDataFile("bluetooth_" + currentTime + ".txt");
+        wifiFile = this.createDataFile("bluetooth_" + currentTime + ".txt");
 
         // set up location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -338,6 +341,8 @@ public class MainActivity extends AppCompatActivity {
             stopWiFiScan();
         } else {
             startWiFiScan();
+            Context context = this.getApplicationContext();
+            new WifiDetails(context, wifiFile);
         }
     }
     /**
@@ -373,6 +378,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void startWiFiScan() {
         wifi = 1;
+
     }
 
     private void stopWiFiScan() {
