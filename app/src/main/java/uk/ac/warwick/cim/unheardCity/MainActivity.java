@@ -64,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
 
     private File locationFile;
 
+    private File bluetoothFile;
+
     private BroadcastReceiver receiver;
 
     public MainActivity() {
@@ -93,8 +95,9 @@ public class MainActivity extends AppCompatActivity {
         //@todo: Link both of these to a date
         //Create log file for both WiFi and Bluetooth connections
         Long currentTime = System.currentTimeMillis();
-        signalFile = this.createDataFile("bluetooth_" + currentTime + ".txt");
+        signalFile = this.createDataFile("bluetoothle_" + currentTime + ".txt");
         locationFile = this.createDataFile("locations_" + currentTime + ".txt");
+        bluetoothFile = this.createDataFile("bluetooth_" + currentTime + ".txt");
 
         // set up location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -153,7 +156,9 @@ public class MainActivity extends AppCompatActivity {
                     String data = locationDetails(location);
                     new FileConnection(locationFile).writeFile(data);
                 }
-                new BluetoothLEDetails(signalFile);
+
+                setUpBluetoothLEscan(signalFile);
+                //new BluetoothLEDetails(signalFile);
 
             }
 
@@ -296,6 +301,28 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(receiver, filter);
     }
 
+    /**
+     * Function to stop the scan if we change protocols
+     */
+    private void stopBluetoothScan() {
+        unregisterReceiver(receiver);
+    }
+
+    /**
+     * Start the Bluetooth LE Scan
+     * @param file
+     */
+    private void setUpBluetoothLEscan(File file) {
+        //@todo: set this up as a runnable for ever 5 seconds
+        //@todo: set up a UI button to set scan time and put in warning.
+        new BluetoothLEDetails(signalFile);
+    }
+
+    /**
+     * Function to handle the file name creation
+     * @param fileName
+     * @return
+     */
     private File createDataFile(String fileName) {
         File fName = new File(this.getExternalFilesDir(null), fileName);
 
