@@ -110,15 +110,7 @@ public class MainActivity extends AppCompatActivity {
                         // Got last known location. In some rare situations this can be null.
                         if (location != null) {
                             Log.i("LOCATION", location.toString());
-                            String data = System.currentTimeMillis()
-                                    + "," + location.getLatitude()
-                                    + "," + location.getLongitude()
-                                    + "," + location.getAltitude()
-                                    + "," + location.getBearing()
-                                    + "," + location.getSpeed()
-                                    + "," + location.getVerticalAccuracyMeters()
-                                    + "," + location.getAccuracy()
-                                    + "\n";
+                            String data = locationDetails(location);
                             new FileConnection(locationFile).writeFile(data);
                         }else {
                             Log.i("LOCATION", "No Location");
@@ -158,15 +150,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 for (Location location : locationResult.getLocations()) {
                     Log.i("LOCATION", location.toString());
-                    String data = System.currentTimeMillis()
-                            + "," + location.getLatitude()
-                            + "," + location.getLongitude()
-                            + "," + location.getAltitude()
-                            + "," + location.getBearing()
-                            + "," + location.getSpeed()
-                            + "," + location.getVerticalAccuracyMeters()
-                            + "," + location.getAccuracy()
-                            + "\n";
+                    String data = locationDetails(location);
                     new FileConnection(locationFile).writeFile(data);
                 }
                 new BluetoothLEDetails(signalFile);
@@ -271,6 +255,26 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.i("LOCATION_ERROR", e.toString());
         }
+    }
+
+    /**
+     * Function to wrap location as a string.
+     * @param location
+     * @return
+     */
+    private String locationDetails (Location location) {
+
+        String details = System.currentTimeMillis()
+                + "," + location.getLatitude()
+                + "," + location.getLongitude()
+                + "," + location.getAltitude()
+                + "," + location.getBearing()
+                + "," + location.getSpeed()
+                + "," + location.getVerticalAccuracyMeters()
+                + "," + location.getAccuracy()
+                + "\n";
+
+        return details;
     }
 
     /**
