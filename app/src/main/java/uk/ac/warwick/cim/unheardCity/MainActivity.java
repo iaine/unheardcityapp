@@ -28,6 +28,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 
 import com.google.android.gms.common.api.ResolvableApiException;
@@ -72,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
     private int Bluetooth = 0;
 
     private int BLE = 0;
+
+    private int wifi = 0;
 
     public MainActivity() {
         requestingLocationUpdates = true;
@@ -162,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
                     new FileConnection(locationFile).writeFile(data);
                 }
 
-                setUpBluetoothLEscan(signalFile);
+                //setUpBluetoothLEscan();
                 //new BluetoothLEDetails(signalFile);
 
             }
@@ -314,6 +317,29 @@ public class MainActivity extends AppCompatActivity {
         Bluetooth = 1;
     }
 
+    public void bScan (View view) {
+        if (Bluetooth == 1) {
+            stopBluetoothScan();
+        } else {
+            setUpBluetoothScan();
+        }
+    }
+
+    public void bleScan (View view) {
+        if (BLE == 1) {
+            stopBluetoothLEscan();
+        } else {
+            setUpBluetoothLEscan();
+        }
+    }
+
+    public void wifiScan (View view) {
+        if (wifi == 1) {
+            stopWiFiScan();
+        } else {
+            startWiFiScan();
+        }
+    }
     /**
      * Function to stop the scan if we change protocols
      * Set the Bluetooth scan flag to 0.
@@ -325,9 +351,8 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Start the Bluetooth LE Scan
-     * @param file
      */
-    private void setUpBluetoothLEscan(File file) {
+    private void setUpBluetoothLEscan() {
         //stop bluetooth scan if running.
         if (Bluetooth == 1) {
             stopBluetoothScan();
@@ -344,6 +369,14 @@ public class MainActivity extends AppCompatActivity {
     private void stopBluetoothLEscan () {
         BLE = 0;
         //@todo: stop runnable
+    }
+
+    private void startWiFiScan() {
+        wifi = 1;
+    }
+
+    private void stopWiFiScan() {
+        wifi = 0;
     }
 
     /**
