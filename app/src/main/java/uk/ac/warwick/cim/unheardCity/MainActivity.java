@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.BatchingListUpdateCallback;
 
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -67,6 +68,10 @@ public class MainActivity extends AppCompatActivity {
     private File bluetoothFile;
 
     private BroadcastReceiver receiver;
+
+    private int Bluetooth = 0;
+
+    private int BLE = 0;
 
     public MainActivity() {
         requestingLocationUpdates = true;
@@ -284,6 +289,10 @@ public class MainActivity extends AppCompatActivity {
      * Set up the Bluetooth scanning
      */
     private void setUpBluetoothScan () {
+
+        if (BLE == 1) {
+            stopBluetoothLEscan();
+        }
         receiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
@@ -299,13 +308,19 @@ public class MainActivity extends AppCompatActivity {
         };
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         registerReceiver(receiver, filter);
+        if (BLE == 1) {
+            BLE = 0;
+        }
+        Bluetooth = 1;
     }
 
     /**
      * Function to stop the scan if we change protocols
+     * Set the Bluetooth scan flag to 0.
      */
     private void stopBluetoothScan() {
         unregisterReceiver(receiver);
+        Bluetooth = 0;
     }
 
     /**
@@ -313,9 +328,22 @@ public class MainActivity extends AppCompatActivity {
      * @param file
      */
     private void setUpBluetoothLEscan(File file) {
+        //stop bluetooth scan if running.
+        if (Bluetooth == 1) {
+            stopBluetoothScan();
+        }
         //@todo: set this up as a runnable for ever 5 seconds
         //@todo: set up a UI button to set scan time and put in warning.
+        BLE = 1;
         new BluetoothLEDetails(signalFile);
+    }
+
+    /**
+     * Function to stop the runnable and to reset the BLE flag
+     */
+    private void stopBluetoothLEscan () {
+        BLE = 0;
+        //@todo: stop runnable
     }
 
     /**
