@@ -100,22 +100,23 @@ public class BluetoothLEDetails {
                     String m = mf(details.getManufacturerSpecificData());
 
                     String serviceUid = "No service";
-                    //if (details.getServiceUuids().size() > 0) {
-                    //List<ParcelUuid> uids = new List<ParcelUuid>();
+                    String serviceData = "No data";
+
                     List<ParcelUuid> uids = serviceID(details);
-                    //if (uids != null && uids.size() > 0) {
+
                     if (uids != null) {
 
-                            //List<ParcelUuid> uids = serviceID(details);
                         StringBuilder ids = new StringBuilder();
                         for (ParcelUuid pUid: uids) {
                             serviceUid = pUid.getUuid().toString();
+                            serviceData = sfd(pUid, details);
 
                             ids.append(pUid.getUuid().toString() + ",");
                             Log.i(TAG, "UUID " + serviceUid + " file " + pUid.describeContents());
                         }
                         serviceUid = ids.toString();
                     }
+                    Log.i(TAG, "Service " +  serviceData);
                     Log.i(TAG, "manufacturer: " + getManufacturerData(details.getManufacturerSpecificData(), details));
                     String data = System.currentTimeMillis()
                             + ", " + result.getDevice()
@@ -130,7 +131,7 @@ public class BluetoothLEDetails {
                             + ", " + m
                             + ", " + mfd(m, details )
                             + ", " + serviceUid
-                            //+ ", " + sfd(s, details)
+                            + ", " + serviceData
                             + "\n";
                     writeData(data);
                     System.out.println(details.toString());
@@ -152,8 +153,13 @@ public class BluetoothLEDetails {
 
     private String sfd(ParcelUuid uuid, ScanRecord r) {
         byte[] serviceData = r.getServiceData(uuid);
+        if (serviceData != null) {
+            String str = new String();
+            return str.valueOf(byteArrayToHex(serviceData).toCharArray());
+            //return ByteArrayToString(serviceData);
+        }
 
-        return new String(serviceData, StandardCharsets.UTF_8);
+        return "No device";
     }
 
     private String mf (SparseArray<byte[]> manufacturer) {
@@ -224,7 +230,7 @@ public class BluetoothLEDetails {
     {
         StringBuilder hex = new StringBuilder(ba.length * 2);
         for (byte b : ba)
-            hex.append(b + " ");
+            hex.append((char)b + " ");
 
         return hex.toString();
     }
