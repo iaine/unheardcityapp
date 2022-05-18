@@ -2,6 +2,8 @@ package uk.ac.warwick.cim.unheardCity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -9,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 
@@ -59,6 +63,8 @@ public class MainActivity extends AppCompatActivity {
     private File signalFile;
 
     private File locationFile;
+
+    private BroadcastReceiver receiver;
 
     public MainActivity() {
         requestingLocationUpdates = true;
@@ -206,6 +212,27 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (requestingLocationUpdates) {
+            startLocationUpdates();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(receiver);
+    }
+
     private void checkPermissions(String accessFineLocation, String s) {
         //Get permissions to find location
         if (ContextCompat.checkSelfPermission(MainActivity.this, accessFineLocation)
@@ -229,22 +256,6 @@ public class MainActivity extends AppCompatActivity {
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        if (requestingLocationUpdates) {
-            startLocationUpdates();
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        stopLocationUpdates();
-    }
-
     private void stopLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(locationCallback);
     }
@@ -260,6 +271,27 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             Log.i("LOCATION_ERROR", e.toString());
         }
+    }
+
+    /**
+     * Set up the Bluetooth scanning
+     */
+    private void setUpBluetoothScan () {
+        receiver = new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                    // Discovery has found a device. Get the BluetoothDevice
+                    // object and its info from the Intent.
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    String deviceName = device.getName();
+                    String deviceHardwareAddress = device.getAddress(); // MAC address
+                    System.out.println("Found device " + deviceName + " with addy " + deviceHardwareAddress);
+                }
+            }
+        };
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        registerReceiver(receiver, filter);
     }
 
     private File createDataFile(String fileName) {
