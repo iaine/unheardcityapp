@@ -187,13 +187,11 @@ public class MainActivity extends AppCompatActivity {
                         resolvable.startResolutionForResult(MainActivity.this,
                                 REQUEST_CHECK_SETTINGS);
                     } catch (IntentSender.SendIntentException sendEx) {
-                        // Ignore the error.
+                        Log.e("Location", sendEx.toString());
                     }
                 }
             }
         });
-
-
     }
 
     @Override
