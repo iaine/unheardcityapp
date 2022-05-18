@@ -7,10 +7,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.BatchingListUpdateCallback;
 
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -25,6 +25,13 @@ import com.google.android.gms.location.LocationServices;
 
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
+import android.net.wifi.rtt.RangingRequest;
+import android.net.wifi.rtt.RangingResult;
+import android.net.wifi.rtt.RangingResultCallback;
+import android.net.wifi.rtt.WifiRttManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
@@ -41,6 +48,8 @@ import com.google.android.gms.tasks.Task;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.Executor;
 
 
 /**
@@ -78,6 +87,14 @@ public class MainActivity extends AppCompatActivity {
 
     private int wifi = 0;
 
+    private WifiManager wifiManager;
+
+    private BroadcastReceiver wifiScanReceiver;
+
+    private BroadcastReceiver wifiRangeReceiver;
+
+    private WifiRttManager wifiRttManager;
+
     public MainActivity() {
         requestingLocationUpdates = true;
     }
@@ -104,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
 
         //assumption that the session will be the time that the app runs.
         //Create log file for both WiFi and Bluetooth connections
-        Long currentTime = System.currentTimeMillis();
+        long currentTime = System.currentTimeMillis();
         signalFile = this.createDataFile("bluetoothle_" + currentTime + ".txt");
         locationFile = this.createDataFile("locations_" + currentTime + ".txt");
         bluetoothFile = this.createDataFile("bluetooth_" + currentTime + ".txt");
@@ -112,10 +129,6 @@ public class MainActivity extends AppCompatActivity {
 
         // set up location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-
-        if(fusedLocationClient == null) {
-            Log.i("Location", "No provider");
-        }
 
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, new OnSuccessListener<Location>() {
@@ -167,9 +180,6 @@ public class MainActivity extends AppCompatActivity {
                     String data = locationDetails(location);
                     new FileConnection(locationFile).writeFile(data);
                 }
-
-                //setUpBluetoothLEscan();
-                //new BluetoothLEDetails(signalFile);
 
             }
 
@@ -341,8 +351,6 @@ public class MainActivity extends AppCompatActivity {
             stopWiFiScan();
         } else {
             startWiFiScan();
-            Context context = this.getApplicationContext();
-            new WifiDetails(context, wifiFile);
         }
     }
     /**
@@ -378,11 +386,92 @@ public class MainActivity extends AppCompatActivity {
 
     private void startWiFiScan() {
         wifi = 1;
+        wifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+        try {
+        wifiScanReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context c, Intent intent) {
+                boolean success = intent.getBooleanExtra(
+                        WifiManager.EXTRA_RESULTS_UPDATED, false);
+                if (success) {
+                    new WifiDetails().scanSuccess(wifiManager, wifiFile);
+                } else {
+                    // scan failure handling
+                    new WifiDetails().scanFailure();
+                }
+            }
+        };
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+        registerReceiver(wifiScanReceiver, intentFilter);
+
+        boolean success = wifiManager.startScan();
+        if (!success) {
+            // scan failure handling
+            new WifiDetails().scanFailure();
+        }
+    } catch (SecurityException se) {
+        Log.i("WIFI", se.toString());
+    }
+        catch (Exception e) {
+        Log.i("WIFI", e.toString());
+    }
 
     }
 
     private void stopWiFiScan() {
         wifi = 0;
+        unregisterReceiver(wifiScanReceiver);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.P)
+    private void startWiFiRanging() {
+
+        wifiRttManager = (WifiRttManager) this.getSystemService(Context.WIFI_RTT_RANGING_SERVICE);
+        if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_RTT)) {
+            //RTT available but is it enabled? User may have changed its state.
+            IntentFilter filter =
+                        new IntentFilter(wifiRttManager.ACTION_WIFI_RTT_STATE_CHANGED);
+
+            wifiRangeReceiver = new BroadcastReceiver() {
+                    //Suppress the Fine Location permission because we request earlier to run the app.
+                    @SuppressLint("MissingPermission")
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        if (wifiRttManager.isAvailable()) {
+                            List<ScanResult> results = wifiManager.getScanResults();
+                            RangingRequest.Builder builder = new RangingRequest.Builder();
+                            builder.addAccessPoints(results);
+                            RangingRequest req = builder.build();
+                            Executor executor = context.getMainExecutor();
+
+                             wifiRttManager.startRanging(req, executor, new RangingResultCallback() {
+
+                                 @Override
+                                 public void onRangingFailure(int code) {
+                                     Log.i("WiFiRTT", "Ranging failure " + code);
+                                 }
+
+                                 @Override
+                                 public void onRangingResults(List<RangingResult> results) {
+                                     for (RangingResult result: results) {
+                                         //We have data, let's get some details
+                                         result.getDistanceMm();
+                                     }
+                                 }
+                             });
+                         } else {
+                            Log.i("WiFiRTT", "Ranging not available");
+                         }
+                    }
+            };
+            registerReceiver(wifiRangeReceiver, filter);
+            }
+    }
+
+    private void stopWiFiRanging () {
+        unregisterReceiver(wifiRangeReceiver);
     }
 
     /**
