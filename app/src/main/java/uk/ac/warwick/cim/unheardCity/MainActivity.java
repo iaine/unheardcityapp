@@ -25,6 +25,7 @@ import com.google.android.gms.location.LocationServices;
 
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.MediaRecorder;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.net.wifi.rtt.RangingRequest;
@@ -35,8 +36,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.EditorInfo;
+import android.widget.EditText;
+import android.widget.TextView;
 
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -98,6 +103,8 @@ public class MainActivity extends AppCompatActivity {
     private WifiRttManager wifiRttManager;
 
     protected WifiScan wifiScan;
+
+    protected MediaRecorder mediaRecorder = new MediaRecorder();;
 
     public MainActivity() {
         requestingLocationUpdates = true;
@@ -204,6 +211,70 @@ public class MainActivity extends AppCompatActivity {
                         Log.e("Location", sendEx.toString());
                     }
                 }
+            }
+        });
+
+        saveNotes();
+
+        setUpRecordAudio();
+
+    }
+
+    /**
+     * Function to use the Microphone for simple audio recording
+     * that writes to an MP4 files.
+     */
+    private void setUpRecordAudio () {
+
+
+        try {
+            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+
+            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+
+            //@todo: add location as well.
+            File audioFile = new File(this.getExternalFilesDir(null),
+                    System.currentTimeMillis() + ".mp4");
+
+            mediaRecorder.setOutputFile(audioFile);
+
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+
+            //let's stick to one channel for now. Maybe stereo later?
+            mediaRecorder.setAudioChannels(1);
+            mediaRecorder.prepare();
+
+        } catch (IOException ioe) {
+            Log.i("AudioRecorder", ioe.toString());
+        } catch (IllegalStateException ise) {
+            Log.i("AudioRecorder", ise.toString());
+        }
+
+    }
+
+    private void startRecordAudio (View view) {
+        mediaRecorder.start();
+    }
+
+    private void stopRecordAudio (View view) {
+        mediaRecorder.stop();
+    }
+
+    /**
+     * Listener to save any made notes made in the UI.
+     * The text will be stored with the time and location.
+     */
+    private void saveNotes() {
+        EditText editText = (EditText) findViewById(R.id.notes_field);
+        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if (actionId == EditorInfo.IME_ACTION_SEND) {
+                    //@todo: save the message with the time and location
+                    handled = true;
+                }
+                return handled;
             }
         });
     }
