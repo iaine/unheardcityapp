@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 
 
-public class BluetoothLEDetails {
+public class BluetoothLEScan implements Scan {
 
     private static final String TAG = "BLUETOOTH";
 
@@ -46,13 +46,14 @@ public class BluetoothLEDetails {
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 2000;
 
-    public BluetoothLEDetails(File fileName) {
+    public BluetoothLEScan(File fileName) {
         Log.i(TAG, "In Bluetooth");
         fName = fileName;
-        this.initBluetoothDetails();
     }
 
-    private void initBluetoothDetails() {
+    public void stop() { this.stopScan();}
+
+    public void start() {
         //final BluetoothManager bluetoothManager = (BluetoothManager) this.getSystemService(BluetoothManager.class);
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -63,6 +64,11 @@ public class BluetoothLEDetails {
 
         this.scanLeDevice();
 
+    }
+
+    private void stopScan() {
+        scanning = false;
+        bluetoothLeScanner.stopScan(leScanCallback);
     }
 
     private void scanLeDevice() {
@@ -82,8 +88,7 @@ public class BluetoothLEDetails {
                     scanning = true;
                     bluetoothLeScanner.startScan(leScanCallback);
                 } else {
-                    scanning = false;
-                    bluetoothLeScanner.stopScan(leScanCallback);
+                    this.stopScan();
                 }
             }
         }
