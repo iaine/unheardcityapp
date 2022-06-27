@@ -63,6 +63,8 @@ import java.util.concurrent.Executor;
 public class MainActivity extends AppCompatActivity {
     public static String id1 = "test_channel_01";
 
+    private static String TAG = "BUTTON";
+
     private FusedLocationProviderClient fusedLocationClient;
 
     protected LocationCallback locationCallback;
@@ -95,6 +97,8 @@ public class MainActivity extends AppCompatActivity {
 
     private WifiRttManager wifiRttManager;
 
+    protected WifiScan wifiScan;
+
     public MainActivity() {
         requestingLocationUpdates = true;
     }
@@ -114,6 +118,8 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.i("LOCATION", "Location permissions");
         }
+
+        //@todo: refactor me into one permissions check
         checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION, "Location Permissions error");
 
         //Get permissions to write data
@@ -125,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
         signalFile = this.createDataFile("bluetoothle_" + currentTime + ".txt");
         locationFile = this.createDataFile("locations_" + currentTime + ".txt");
         bluetoothFile = this.createDataFile("bluetooth_" + currentTime + ".txt");
-        wifiFile = this.createDataFile("bluetooth_" + currentTime + ".txt");
+        wifiFile = this.createDataFile("wifi_" + currentTime + ".txt");
 
         // set up location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -141,30 +147,12 @@ public class MainActivity extends AppCompatActivity {
                             new FileConnection(locationFile).writeFile(data);
                         }else {
                             Log.i("LOCATION", "No Location");
-                            new BluetoothLEDetails(signalFile);
+                            new BluetoothLEScan(signalFile);
                         }
                     }
 
                 });
 
-
-        /*createchannel();  //needed for the persistent notification created in service.
-
-        //IntentService start with 5 random number toasts
-        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent number5 = new Intent(getBaseContext(), MyForeGroundService.class);
-                number5.putExtra("times", 50);
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                    startForegroundService(number5);
-                } else {
-                    //lower then Oreo, just start the service.
-                    startService(number5);
-                }
-                finish();  //make sure this activity has exited. f
-            }
-        });*/
         locationCallback = new LocationCallback() {
 
             @Override
@@ -287,8 +275,8 @@ public class MainActivity extends AppCompatActivity {
      * @return
      */
     private String locationDetails (Location location) {
-
-        String details = System.currentTimeMillis()
+        String details = "";
+        details = System.currentTimeMillis()
                 + "," + location.getLatitude()
                 + "," + location.getLongitude()
                 + "," + location.getAltitude()
@@ -306,11 +294,13 @@ public class MainActivity extends AppCompatActivity {
      */
     private void setUpBluetoothScan () {
 
+        Log.i(TAG, "Bluetooth ON");
         if (BLE == 1) {
             stopBluetoothLEscan();
         }
         receiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
+                BluetoothScan bluetoothScan = new BluetoothScan(context);
                 String action = intent.getAction();
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                     // Discovery has found a device. Get the BluetoothDevice
@@ -318,7 +308,10 @@ public class MainActivity extends AppCompatActivity {
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     String deviceName = device.getName();
                     String deviceHardwareAddress = device.getAddress(); // MAC address
-                    System.out.println("Found device " + deviceName + " with addy " + deviceHardwareAddress);
+                    Log.i(TAG, "Found device " + deviceName + " with addy " + deviceHardwareAddress);
+                    bluetoothScan.writeData(bluetoothFile, deviceHardwareAddress +", " + deviceName);
+                } else {
+                    Log.i("BLUE_DEBUG", "Given action is " + action);
                 }
             }
         };
@@ -358,6 +351,7 @@ public class MainActivity extends AppCompatActivity {
      * Set the Bluetooth scan flag to 0.
      */
     private void stopBluetoothScan() {
+        Log.i(TAG, "Bluetooth OFF");
         unregisterReceiver(receiver);
         Bluetooth = 0;
     }
@@ -366,6 +360,7 @@ public class MainActivity extends AppCompatActivity {
      * Start the Bluetooth LE Scan
      */
     private void setUpBluetoothLEscan() {
+        Log.i(TAG, "BluetoothLE ON");
         //stop bluetooth scan if running.
         if (Bluetooth == 1) {
             stopBluetoothScan();
@@ -373,60 +368,45 @@ public class MainActivity extends AppCompatActivity {
         //@todo: set this up as a runnable for ever 5 seconds
         //@todo: set up a UI button to set scan time and put in warning.
         BLE = 1;
-        new BluetoothLEDetails(signalFile);
+        new BluetoothLEScan(signalFile);
     }
 
     /**
      * Function to stop the runnable and to reset the BLE flag
      */
     private void stopBluetoothLEscan () {
+        Log.i(TAG, "BluetoothLE OFF");
         BLE = 0;
         //@todo: stop runnable
     }
 
+
+
     private void startWiFiScan() {
+        Log.i(TAG, "WiFi ON");
         wifi = 1;
         wifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         try {
-        wifiScanReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context c, Intent intent) {
-                boolean success = intent.getBooleanExtra(
-                        WifiManager.EXTRA_RESULTS_UPDATED, false);
-                if (success) {
-                    new WifiDetails().scanSuccess(wifiManager, wifiFile);
-                } else {
-                    // scan failure handling
-                    new WifiDetails().scanFailure();
-                }
-            }
-        };
-
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        registerReceiver(wifiScanReceiver, intentFilter);
-
-        boolean success = wifiManager.startScan();
-        if (!success) {
-            // scan failure handling
-            new WifiDetails().scanFailure();
+            wifiScan = new WifiScan(this, wifiManager, wifiFile);
+            wifiScan.start();
+        } catch (SecurityException se) {
+            Log.i("WIFI", se.toString());
         }
-    } catch (SecurityException se) {
-        Log.i("WIFI", se.toString());
-    }
-        catch (Exception e) {
-        Log.i("WIFI", e.toString());
-    }
+            catch (Exception e) {
+            Log.i("WIFI", e.toString());
+        }
 
     }
 
     private void stopWiFiScan() {
+        Log.i(TAG, "WiFi OFF");
         wifi = 0;
-        unregisterReceiver(wifiScanReceiver);
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.P)
     private void startWiFiRanging() {
+        Log.i(TAG, "WiFi Ranging ON");
 
         wifiRttManager = (WifiRttManager) this.getSystemService(Context.WIFI_RTT_RANGING_SERVICE);
         if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_RTT)) {
@@ -471,6 +451,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void stopWiFiRanging () {
+        Log.i(TAG, "WiFi Ranging OFF");
         unregisterReceiver(wifiRangeReceiver);
     }
 
