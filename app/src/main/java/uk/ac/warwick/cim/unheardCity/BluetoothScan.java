@@ -5,17 +5,27 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.util.Log;
 
-public class BluetoothDetails {
+import java.io.File;
 
-    protected void onCreate(Bundle savedInstanceState) {
-        // Register for broadcasts when a device is discovered.
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(receiver, filter);
+public class BluetoothScan implements Scan {
+
+    protected Context ctx;
+
+    protected BluetoothScan(Context context) {
+        ctx = context;
     }
 
-    private void registerReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+    public void start() {
+        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        ctx.registerReceiver(receiver, filter);
+    }
+
+    public void stop() {
+        ctx.unregisterReceiver(receiver);
     }
 
     // Create a BroadcastReceiver for ACTION_FOUND.
@@ -32,15 +42,14 @@ public class BluetoothDetails {
         }
     };
 
-
-    protected void onDestroy() {
-        //super.onDestroy();
-
-        // Don't forget to unregister the ACTION_FOUND receiver.
-        unregisterReceiver(receiver);
+    public void writeData (File fName, String data) {
+        try {
+            new FileConnection(fName).writeFile(data);
+        } catch (Exception e) {
+            Log.i("BLUETOOTH", e.toString());
+        }
     }
 
-    private void unregisterReceiver(BroadcastReceiver receiver) {
-    }
+
 
 }
