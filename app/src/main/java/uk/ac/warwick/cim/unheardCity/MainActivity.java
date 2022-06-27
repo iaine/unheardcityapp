@@ -126,6 +126,9 @@ public class MainActivity extends AppCompatActivity {
             Log.i("LOCATION", "Location permissions");
         }
 
+        String[] permissions = {Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
         //@todo: refactor me into one permissions check
         checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION, "Location Permissions error");
 
