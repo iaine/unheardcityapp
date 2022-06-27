@@ -15,35 +15,61 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:id="@+id/textView" />
+
     <Button
         android:id="@+id/button"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        android:onClick="bScan"
         android:text="Bluetooth Scan"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
-        android:onClick="bScan"/>
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <Button
         android:id="@+id/button2"
-        android:layout_width="328dp"
-        android:layout_height="44dp"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:onClick="bleScan"
         android:text="Bluetooth LE Scan"
-        tools:layout_editor_absoluteX="44dp"
-        tools:layout_editor_absoluteY="468dp"
-        android:onClick="bleScan"/>
+        app:layout_constraintTop_toBottomOf="@+id/button" />
 
     <Button
         android:id="@+id/button3"
         android:layout_width="332dp"
         android:layout_height="51dp"
+        android:onClick="wifiScan"
         android:text="Scan WiFi"
-        tools:layout_editor_absoluteX="42dp"
-        tools:layout_editor_absoluteY="528dp"
-        android:onClick="wifiScan"/>
+        tools:layout_editor_absoluteX="37dp"
+        tools:layout_editor_absoluteY="26dp" />
+
+    <EditText
+        android:id="@+id/notes_field"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter Notes"
+        android:inputType="textMultiLine"
+        android:imeOptions="actionSend" />
+
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="332dp"
+        android:layout_height="51dp"
+        android:onClick="wifiScan"
+        android:text="Save Audio"
+        tools:layout_editor_absoluteX="37dp"
+        tools:layout_editor_absoluteY="246dp" />
+
+    <Button
+        android:id="@+id/button5"
+        android:layout_width="332dp"
+        android:layout_height="51dp"
+        android:onClick="wifiScan"
+        android:text="Record Audio Notes"
+        tools:layout_editor_absoluteX="37dp"
+        tools:layout_editor_absoluteY="296dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
