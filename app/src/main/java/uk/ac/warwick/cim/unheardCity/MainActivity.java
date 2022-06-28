@@ -104,7 +104,11 @@ public class MainActivity extends AppCompatActivity {
 
     protected WifiScan wifiScan;
 
-    protected MediaRecorder mediaRecorder = new MediaRecorder();;
+    protected MediaRecorder mediaRecorder = new MediaRecorder();
+
+    private BluetoothScan bluetoothScan;
+
+    private BluetoothLEScan bleScanner;
 
     public MainActivity() {
         requestingLocationUpdates = true;
@@ -142,6 +146,9 @@ public class MainActivity extends AppCompatActivity {
         locationFile = this.createDataFile("locations_" + currentTime + ".txt");
         bluetoothFile = this.createDataFile("bluetooth_" + currentTime + ".txt");
         wifiFile = this.createDataFile("wifi_" + currentTime + ".txt");
+
+        bleScanner = new BluetoothLEScan(signalFile);
+        bluetoothScan = new BluetoothScan(this, bluetoothFile);
 
         // set up location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -219,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
 
         saveNotes();
 
-        setUpRecordAudio();
+        //setUpRecordAudio();
 
     }
 
@@ -368,29 +375,14 @@ public class MainActivity extends AppCompatActivity {
      */
     private void setUpBluetoothScan () {
 
+        //bluetoothScan = new BluetoothScan(this, bluetoothFile);
+        bluetoothScan.start();
+
         Log.i(TAG, "Bluetooth ON");
         if (BLE == 1) {
             stopBluetoothLEscan();
         }
-        receiver = new BroadcastReceiver() {
-            public void onReceive(Context context, Intent intent) {
-                BluetoothScan bluetoothScan = new BluetoothScan(context);
-                String action = intent.getAction();
-                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                    // Discovery has found a device. Get the BluetoothDevice
-                    // object and its info from the Intent.
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    String deviceName = device.getName();
-                    String deviceHardwareAddress = device.getAddress(); // MAC address
-                    Log.i(TAG, "Found device " + deviceName + " with addy " + deviceHardwareAddress);
-                    bluetoothScan.writeData(bluetoothFile, deviceHardwareAddress +", " + deviceName);
-                } else {
-                    Log.i("BLUE_DEBUG", "Given action is " + action);
-                }
-            }
-        };
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(receiver, filter);
+
         if (BLE == 1) {
             BLE = 0;
         }
@@ -425,8 +417,9 @@ public class MainActivity extends AppCompatActivity {
      * Set the Bluetooth scan flag to 0.
      */
     private void stopBluetoothScan() {
+        bluetoothScan.stop();
         Log.i(TAG, "Bluetooth OFF");
-        unregisterReceiver(receiver);
+        //unregisterReceiver(receiver);
         Bluetooth = 0;
     }
 
@@ -442,7 +435,7 @@ public class MainActivity extends AppCompatActivity {
         //@todo: set this up as a runnable for ever 5 seconds
         //@todo: set up a UI button to set scan time and put in warning.
         BLE = 1;
-        new BluetoothLEScan(signalFile);
+        bleScanner.start();
     }
 
     /**
@@ -451,10 +444,8 @@ public class MainActivity extends AppCompatActivity {
     private void stopBluetoothLEscan () {
         Log.i(TAG, "BluetoothLE OFF");
         BLE = 0;
-        //@todo: stop runnable
+        bleScanner.stop();
     }
-
-
 
     private void startWiFiScan() {
         Log.i(TAG, "WiFi ON");
@@ -475,6 +466,7 @@ public class MainActivity extends AppCompatActivity {
     private void stopWiFiScan() {
         Log.i(TAG, "WiFi OFF");
         wifi = 0;
+        wifiScan.stop();
 
     }
 
