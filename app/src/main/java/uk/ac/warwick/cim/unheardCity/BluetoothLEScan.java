@@ -43,8 +43,12 @@ public class BluetoothLEScan implements Scan {
 
     private Handler handler = new Handler();
 
+    private Runnable bleScanRun;
+
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 2000;
+
+    private int timeInterval = 5000;
 
     public BluetoothLEScan(File fileName) {
         Log.i(TAG, "In Bluetooth");
@@ -62,13 +66,21 @@ public class BluetoothLEScan implements Scan {
             ((Activity) mContext).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
 
-        this.scanLeDevice();
+        bleScanRun = new Runnable() {
+            @Override
+            public void run() {
+                scanLeDevice();
+                handler.postDelayed(this, timeInterval);
+            }
+        };
+        handler.postDelayed(bleScanRun, timeInterval);
 
     }
 
     private void stopScan() {
         scanning = false;
         bluetoothLeScanner.stopScan(leScanCallback);
+        handler.removeCallbacks(bleScanRun);
     }
 
     private void scanLeDevice() {
