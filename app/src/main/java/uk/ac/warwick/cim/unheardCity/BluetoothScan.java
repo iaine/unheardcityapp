@@ -50,8 +50,7 @@ public class BluetoothScan implements Scan {
         receiver = new BroadcastReceiver() {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
-                Log.i(TAG, "action is " + action);
-                Log.i(TAG, "bluetooth action is " + BluetoothDevice.ACTION_FOUND);
+
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                     // Discovery has found a device. Get the BluetoothDevice
                     // object and its info from the Intent.
@@ -86,7 +85,7 @@ public class BluetoothScan implements Scan {
         try {
             new FileConnection(fName).writeFile(data);
         } catch (Exception e) {
-            Log.i("BLUETOOTH", e.toString());
+            Log.i(TAG, e.toString());
         }
     }
 
