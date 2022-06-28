@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Handler;
 import android.util.Log;
 
 import java.io.File;
@@ -20,18 +21,16 @@ public class WifiScan  implements Scan {
 
     protected File wifiFile;
 
-    protected BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context c, Intent intent) {
-            boolean success = intent.getBooleanExtra(
-                    WifiManager.EXTRA_RESULTS_UPDATED, false);
-            if (success) {
-                scanSuccess(wifiManager, wifiFile);
-            } else {
-                scanFailure();
-            }
-        }
-    };
+    private Runnable wifiScanRunner;
+
+    private Handler handler = new Handler();
+
+    private int timeInterval = 5000;
+
+    private final static String TAG = "WiFiCScan";
+
+    private BroadcastReceiver wifiScanReceiver;
+
 
     protected WifiScan (Context context, WifiManager wManager, File file) {
         wifiManager = wManager;
@@ -43,11 +42,39 @@ public class WifiScan  implements Scan {
     public void start() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
+
+        wifiScanReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context c, Intent intent) {
+                boolean success = intent.getBooleanExtra(
+                        WifiManager.EXTRA_RESULTS_UPDATED, false);
+                if (success) {
+                    scanSuccess(wifiManager, wifiFile);
+                } else {
+                    scanFailure();
+                }
+            }
+        };
+
         ctx.registerReceiver(wifiScanReceiver, intentFilter);
+
+        wifiScanRunner = new Runnable() {
+            @Override
+            public void run() {
+                boolean success = wifiManager.startScan();
+                if (!success) {
+                    // scan failure handling
+                    Log.i(TAG, "Could not scan");
+                }
+                handler.postDelayed(this, timeInterval);
+            }
+        };
+        handler.postDelayed(wifiScanRunner, timeInterval);
     }
 
     public void stop() {
         ctx.unregisterReceiver(wifiScanReceiver);
+        handler.removeCallbacks(wifiScanRunner);
     }
 
     public void scanSuccess(WifiManager wifiManager, File fileName) {
@@ -63,7 +90,7 @@ public class WifiScan  implements Scan {
                         + ", " + scan.level
                         + "," + scan.frequency
                         + "\n";
-                new FileConnection(fileName).execute(data);
+                new FileConnection(wifiFile).execute(data);
 
             }
         }  catch (Exception e ) {
@@ -75,7 +102,6 @@ public class WifiScan  implements Scan {
         // handle failure: new scan did NOT succeed
         // Provide a message
         Log.i("WIFI", "Scan wifi failed");
-
     }
 
 }
