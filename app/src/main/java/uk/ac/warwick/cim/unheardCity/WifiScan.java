@@ -25,7 +25,8 @@ public class WifiScan  implements Scan {
 
     private Handler handler = new Handler();
 
-    private int timeInterval = 5000;
+    //OS throttles to 4 scans in 2 minutes so run at 30 seconds.
+    private final static int timeInterval = 30000;
 
     private final static String TAG = "WiFiCScan";
 
@@ -36,7 +37,6 @@ public class WifiScan  implements Scan {
         wifiManager = wManager;
         ctx = context;
         wifiFile = file;
-
     }
 
     public void start() {
@@ -90,7 +90,7 @@ public class WifiScan  implements Scan {
                         + ", " + scan.level
                         + "," + scan.frequency
                         + "\n";
-                new FileConnection(wifiFile).execute(data);
+                new FileConnection(fileName).execute(data);
 
             }
         }  catch (Exception e ) {
