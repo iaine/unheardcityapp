@@ -2,7 +2,6 @@ package uk.ac.warwick.cim.unheardCity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 
@@ -68,7 +67,7 @@ import java.util.concurrent.Executor;
 public class MainActivity extends AppCompatActivity {
     public static String id1 = "test_channel_01";
 
-    private static String TAG = "BUTTON";
+    private static final String TAG = "BUTTON";
 
     private FusedLocationProviderClient fusedLocationClient;
 
@@ -283,6 +282,7 @@ public class MainActivity extends AppCompatActivity {
                 if (actionId == EditorInfo.IME_ACTION_SEND) {
                     //@todo: save the message with the time and location
                     handled = true;
+                    Log.i(TAG, "Note ");
                 }
                 return handled;
             }
@@ -379,14 +379,14 @@ public class MainActivity extends AppCompatActivity {
         bluetoothScan.start();
 
         Log.i(TAG, "Bluetooth ON");
-        if (BLE == 1) {
+        //if (BLE == 1) {
             stopBluetoothLEscan();
-        }
+        /*}
 
         if (BLE == 1) {
             BLE = 0;
         }
-        Bluetooth = 1;
+        Bluetooth = 1;*/
     }
 
     public void bScan (View view) {
@@ -429,9 +429,9 @@ public class MainActivity extends AppCompatActivity {
     private void setUpBluetoothLEscan() {
         Log.i(TAG, "BluetoothLE ON");
         //stop bluetooth scan if running.
-        if (Bluetooth == 1) {
+        /*if (Bluetooth == 1) {
             stopBluetoothScan();
-        }
+        }*/
         //@todo: set this up as a runnable for ever 5 seconds
         //@todo: set up a UI button to set scan time and put in warning.
         BLE = 1;
