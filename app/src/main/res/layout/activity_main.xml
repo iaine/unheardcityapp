@@ -31,54 +31,65 @@
 
     <Button
         android:id="@+id/button2"
-        android:layout_width="0dp"
+        android:layout_width="160dp"
         android:layout_height="48dp"
         android:onClick="bleScan"
         android:text="Bluetooth LE Scan"
+        app:layout_constraintRight_toLeftOf="@+id/button3"
         app:layout_constraintTop_toBottomOf="@+id/button" />
 
     <Button
         android:id="@+id/button3"
-        android:layout_width="332dp"
+        android:layout_width="160dp"
         android:layout_height="51dp"
+        android:layout_marginTop="8dp"
         android:onClick="wifiScan"
         android:text="Scan WiFi"
-        tools:layout_editor_absoluteX="37dp"
-        tools:layout_editor_absoluteY="26dp" />
+        app:layout_constraintHorizontal_bias="0.864"
+        app:layout_constraintLeft_toLeftOf="@+id/button2"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button" />
 
     <EditText
         android:id="@+id/notes_field"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="Enter Notes"
+        android:imeOptions="actionSend"
         android:inputType="textMultiLine"
-        android:imeOptions="actionSend" />
+        android:text="Enter Notes"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="526dp"
+        tools:ignore="MissingConstraints" />
 
     <Button
         android:id="@+id/button4"
-        android:layout_width="332dp"
+        android:layout_width="160dp"
         android:layout_height="51dp"
-        android:onClick="wifiScan"
-        android:text="Save Audio"
-        tools:layout_editor_absoluteX="37dp"
-        tools:layout_editor_absoluteY="246dp" />
+        android:text="Save Note"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/notes_field"
+        tools:layout_editor_absoluteX="144dp" />
 
     <Button
         android:id="@+id/button5"
-        android:layout_width="332dp"
+        android:layout_width="180dp"
         android:layout_height="51dp"
         android:onClick="startRecordAudio"
-        android:text="Record Audio Notes"
-        tools:layout_editor_absoluteX="37dp"
-        tools:layout_editor_absoluteY="296dp" />
+        android:text="Start Recording"
+        app:layout_constraintTop_toBottomOf="@+id/button4"
+        app:layout_constraintRight_toLeftOf="@+id/button6"
+        tools:layout_editor_absoluteX="8dp" />
 
     <Button
         android:id="@+id/button6"
-        android:layout_width="332dp"
+        android:layout_width="180dp"
         android:layout_height="51dp"
         android:onClick="stopRecordAudio"
-        android:text="Stop Audio Notes"
-        tools:layout_editor_absoluteX="37dp"
-        tools:layout_editor_absoluteY="296dp" />
+        android:text="Stop Recording"
+        app:layout_constraintTop_toBottomOf="@+id/button4"
+        app:layout_constraintRight_toRightOf="@+id/button5"
+        tools:layout_editor_absoluteX="217dp"
+        tools:layout_editor_absoluteY="575dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
