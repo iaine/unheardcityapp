@@ -223,8 +223,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        saveNotes();
-
         //setUpRecordAudio();
 
     }
@@ -273,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
      * Listener to save any made notes made in the UI.
      * The text will be stored with the time and location.
      */
-    private void saveNotes() {
+    public void saveNotes(View view) {
         EditText editText = (EditText) findViewById(R.id.notes_field);
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
