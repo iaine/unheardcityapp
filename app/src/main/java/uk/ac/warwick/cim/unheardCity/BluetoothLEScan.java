@@ -45,8 +45,8 @@ public class BluetoothLEScan implements Scan {
 
     private Runnable bleScanRun;
 
-    // Stops scanning after 10 seconds.
-    private static final long SCAN_PERIOD = 2000;
+    // Stops scanning after 2.5 seconds.
+    private static final long SCAN_PERIOD = 2500;
 
     private int timeInterval = 5000;
 
@@ -70,6 +70,7 @@ public class BluetoothLEScan implements Scan {
             @Override
             public void run() {
                 scanLeDevice();
+                //if (scanning) handler.postDelayed(this, timeInterval);
                 handler.postDelayed(this, timeInterval);
             }
         };
