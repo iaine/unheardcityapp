@@ -377,14 +377,14 @@ public class MainActivity extends AppCompatActivity {
         bluetoothScan.start();
 
         Log.i(TAG, "Bluetooth ON");
-        //if (BLE == 1) {
+        if (BLE == 1) {
             stopBluetoothLEscan();
-        /*}
+        }
 
         if (BLE == 1) {
             BLE = 0;
         }
-        Bluetooth = 1;*/
+        Bluetooth = 1;
     }
 
     public void bScan (View view) {
@@ -427,9 +427,9 @@ public class MainActivity extends AppCompatActivity {
     private void setUpBluetoothLEscan() {
         Log.i(TAG, "BluetoothLE ON");
         //stop bluetooth scan if running.
-        /*if (Bluetooth == 1) {
+        if (Bluetooth == 1) {
             stopBluetoothScan();
-        }*/
+        }
         //@todo: set this up as a runnable for ever 5 seconds
         //@todo: set up a UI button to set scan time and put in warning.
         BLE = 1;

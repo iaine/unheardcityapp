@@ -70,7 +70,7 @@ public class BluetoothLEScan implements Scan {
             @Override
             public void run() {
                 scanLeDevice();
-                //if (scanning) handler.postDelayed(this, timeInterval);
+                if (scanning) handler.postDelayed(this, timeInterval);
                 handler.postDelayed(this, timeInterval);
             }
         };
