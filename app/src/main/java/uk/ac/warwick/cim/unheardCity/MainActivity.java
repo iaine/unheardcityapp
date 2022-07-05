@@ -95,12 +95,6 @@ public class MainActivity extends AppCompatActivity {
 
     private WifiManager wifiManager;
 
-    private BroadcastReceiver wifiScanReceiver;
-
-    private BroadcastReceiver wifiRangeReceiver;
-
-    private WifiRttManager wifiRttManager;
-
     protected WifiScan wifiScan;
 
     protected MediaRecorder mediaRecorder = new MediaRecorder();
@@ -466,57 +460,6 @@ public class MainActivity extends AppCompatActivity {
         wifi = 0;
         wifiScan.stop();
 
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.P)
-    private void startWiFiRanging() {
-        Log.i(TAG, "WiFi Ranging ON");
-
-        wifiRttManager = (WifiRttManager) this.getSystemService(Context.WIFI_RTT_RANGING_SERVICE);
-        if (this.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WIFI_RTT)) {
-            //RTT available but is it enabled? User may have changed its state.
-            IntentFilter filter =
-                        new IntentFilter(wifiRttManager.ACTION_WIFI_RTT_STATE_CHANGED);
-
-            wifiRangeReceiver = new BroadcastReceiver() {
-                    //Suppress the Fine Location permission because we request earlier to run the app.
-                    @SuppressLint("MissingPermission")
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        if (wifiRttManager.isAvailable()) {
-                            List<ScanResult> results = wifiManager.getScanResults();
-                            RangingRequest.Builder builder = new RangingRequest.Builder();
-                            builder.addAccessPoints(results);
-                            RangingRequest req = builder.build();
-                            Executor executor = context.getMainExecutor();
-
-                             wifiRttManager.startRanging(req, executor, new RangingResultCallback() {
-
-                                 @Override
-                                 public void onRangingFailure(int code) {
-                                     Log.i("WiFiRTT", "Ranging failure " + code);
-                                 }
-
-                                 @Override
-                                 public void onRangingResults(List<RangingResult> results) {
-                                     for (RangingResult result: results) {
-                                         //We have data, let's get some details
-                                         result.getDistanceMm();
-                                     }
-                                 }
-                             });
-                         } else {
-                            Log.i("WiFiRTT", "Ranging not available");
-                         }
-                    }
-            };
-            registerReceiver(wifiRangeReceiver, filter);
-            }
-    }
-
-    private void stopWiFiRanging () {
-        Log.i(TAG, "WiFi Ranging OFF");
-        unregisterReceiver(wifiRangeReceiver);
     }
 
     /**
