@@ -227,7 +227,6 @@ public class MainActivity extends AppCompatActivity {
      */
     private void setUpRecordAudio () {
 
-
         try {
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 
