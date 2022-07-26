@@ -126,11 +126,12 @@ public class MainActivity extends AppCompatActivity {
         String[] permissions = {Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
+        checkPermissions(permissions);
         //@todo: refactor me into one permissions check
-        checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION, "Location Permissions error");
+        //checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION, "Location Permissions error");
 
         //Get permissions to write data
-        checkPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, "Write permissions error");
+        //checkPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, "Write permissions error");
 
         //assumption that the session will be the time that the app runs.
         //Create log file for both WiFi and Bluetooth connections
@@ -299,6 +300,29 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(receiver);
+    }
+
+    private void checkPermissions(String[] permissions) {
+
+        for (String permission: permissions) {
+            //Get permissions to find location
+            if (ContextCompat.checkSelfPermission(MainActivity.this, permission)
+                    != PackageManager.PERMISSION_GRANTED) {
+                Log.i("PERMISSIONS", "Granted " + permission);
+                try {
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                            permission)) {
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[]{permission}, 1);
+                    } else {
+                        ActivityCompat.requestPermissions(MainActivity.this,
+                                new String[]{permission}, 1);
+                    }
+                } catch (Exception e) {
+                    Log.i("PERMISSIONS", e.toString());
+                }
+            }
+        }
     }
 
     private void checkPermissions(String accessFineLocation, String s) {
