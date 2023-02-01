@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
 
     protected WifiScan wifiScan;
 
-    protected MediaRecorder mediaRecorder = new MediaRecorder();
+    protected MediaRecorder mediaRecorder;
 
     private BluetoothScan bluetoothScan;
 
@@ -217,9 +217,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
-        //setUpRecordAudio();
-
     }
 
     /**
@@ -227,6 +224,8 @@ public class MainActivity extends AppCompatActivity {
      * that writes to an MP4 files.
      */
     private void setUpRecordAudio () {
+
+         mediaRecorder = new MediaRecorder();
 
         try {
             mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -253,12 +252,16 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void startRecordAudio (View view) {
+    public void startRecordAudio (View view) {
+        setUpRecordAudio();
         mediaRecorder.start();
+
     }
 
-    private void stopRecordAudio (View view) {
+    public void stopRecordAudio (View view) {
         mediaRecorder.stop();
+        mediaRecorder.release();
+        mediaRecorder = null;
     }
 
     /**
