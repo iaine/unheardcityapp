@@ -50,7 +50,6 @@ import java.io.IOException;
  */
 
 public class MainActivity extends AppCompatActivity {
-    public static String id1 = "test_channel_01";
 
     private static final String TAG = "BUTTON";
 
