@@ -38,7 +38,8 @@ public class BluetoothScan implements Scan {
     private final FormatData formatData = new FormatData();
 
     protected BluetoothScan(Context context, File file) {
-        ctx = context;
+        //ctx = context;
+        ctx = signalCityApplication.getAppContext();
         fName = file;
     }
 
