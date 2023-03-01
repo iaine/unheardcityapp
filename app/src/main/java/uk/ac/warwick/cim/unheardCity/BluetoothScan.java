@@ -23,19 +23,19 @@ public class BluetoothScan implements Scan {
 
     private BroadcastReceiver receiver;
 
-    private String TAG = "BluetoothScan";
+    private final String TAG = "BluetoothScan";
 
-    private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    private final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-    private int timeInterval = 5000;
+    private final int timeInterval = 5000;
 
-    private Handler handler = new Handler();
+    private final Handler handler = new Handler();
 
     private Runnable blueScanRunner;
 
-    private File fName;
+    private final File fName;
 
-    private FormatData formatData = new FormatData();
+    private final FormatData formatData = new FormatData();
 
     protected BluetoothScan(Context context, File file) {
         ctx = context;
