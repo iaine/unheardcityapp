@@ -23,7 +23,12 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-
+/**
+ * WiFi scanner runs ever 30 seconds or so - limited by Android OS to 4 scans
+ * per 2 minutes. Data is written to the file.
+ *
+ * WiFiRanging is included but not active at the moment.
+ */
 public class WifiScan  implements Scan {
 
     protected WifiManager wifiManager;
