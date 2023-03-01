@@ -6,13 +6,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 
@@ -25,22 +22,12 @@ import com.google.android.gms.location.LocationServices;
 import android.location.Location;
 import android.location.LocationManager;
 import android.media.MediaRecorder;
-import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.net.wifi.rtt.RangingRequest;
-import android.net.wifi.rtt.RangingResult;
-import android.net.wifi.rtt.RangingResultCallback;
-import android.net.wifi.rtt.WifiRttManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -52,8 +39,6 @@ import com.google.android.gms.tasks.Task;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.Executor;
 
 
 /**
@@ -264,26 +249,6 @@ public class MainActivity extends AppCompatActivity {
         mediaRecorder = null;
     }
 
-    /**
-     * Listener to save any made notes made in the UI.
-     * The text will be stored with the time and location.
-     */
-    public void saveNotes(View view) {
-        EditText editText = (EditText) findViewById(R.id.notes_field);
-        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                boolean handled = false;
-                if (actionId == EditorInfo.IME_ACTION_SEND) {
-                    //@todo: save the message with the time and location
-                    handled = true;
-                    Log.i(TAG, "Note ");
-                }
-                return handled;
-            }
-        });
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
@@ -391,7 +356,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Set up the Bluetooth scanning
      */
-    private void setUpBluetoothScan () {
+    public void setUpBluetoothScan () {
 
         //bluetoothScan = new BluetoothScan(this, bluetoothFile);
         bluetoothScan.start();
