@@ -30,6 +30,8 @@ public class BluetoothScan implements Scan {
 
     private File fName;
 
+    private FormatData formatData = new FormatData();
+
     protected BluetoothScan(Context context, File file) {
         ctx = context;
         fName = file;
@@ -56,7 +58,7 @@ public class BluetoothScan implements Scan {
                     // object and its info from the Intent.
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-                    String data = System.currentTimeMillis()
+                    /*String data = System.currentTimeMillis()
                             + ", " + device.getAddress()
                             + ", " + device.getName()
                             + ", " + device.getType();
@@ -64,7 +66,8 @@ public class BluetoothScan implements Scan {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         data += ", " + device.getAlias();
                     }
-                    data +=  "\n";
+                    data +=  "\n";*/
+                    String data = formatData.formatBluetooth(device);
                     writeData(fName, data);
                 }
             }
