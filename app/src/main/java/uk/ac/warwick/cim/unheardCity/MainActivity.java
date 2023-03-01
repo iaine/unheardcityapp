@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
     
     private LocationRequest locationRequest;
 
-    private boolean requestingLocationUpdates;
+    private final boolean requestingLocationUpdates;
 
     private File signalFile;
 
@@ -88,6 +88,8 @@ public class MainActivity extends AppCompatActivity {
 
     private BluetoothLEScan bleScanner;
 
+    private  FormatData formatData = new FormatData();
+
     public MainActivity() {
         requestingLocationUpdates = true;
     }
@@ -100,6 +102,12 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+
+        String[] permissions = {Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+        checkPermissions(permissions);
+
         final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
 
         if ( !manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
@@ -107,16 +115,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.i("LOCATION", "Location permissions");
         }
-
-        String[] permissions = {Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
-        checkPermissions(permissions);
-        //@todo: refactor me into one permissions check
-        //checkPermissions(Manifest.permission.ACCESS_FINE_LOCATION, "Location Permissions error");
-
-        //Get permissions to write data
-        //checkPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, "Write permissions error");
 
         //assumption that the session will be the time that the app runs.
         //Create log file for both WiFi and Bluetooth connections
@@ -133,13 +131,14 @@ public class MainActivity extends AppCompatActivity {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                .addOnSuccessListener(this, new OnSuccessListener<>() {
                     @Override
                     public void onSuccess(Location location) {
                         // Got last known location. In some rare situations this can be null.
                         if (location != null) {
                             Log.i("LOCATION", location.toString());
-                            String data = locationDetails(location);
+                            //String data = locationDetails(location);
+                            String data = formatData.formatLocation(location);
                             new FileConnection(locationFile).writeFile(data);
                         }else {
                             Log.i("LOCATION", "No Location");
@@ -161,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 for (Location location : locationResult.getLocations()) {
                     Log.i("LOCATION", location.toString());
-                    String data = locationDetails(location);
+                    String data = formatData.formatLocation(location);
                     new FileConnection(locationFile).writeFile(data);
                 }
 
