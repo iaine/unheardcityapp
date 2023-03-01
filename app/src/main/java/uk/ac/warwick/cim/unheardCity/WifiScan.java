@@ -16,6 +16,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
+import androidx.annotation.FractionRes;
 import androidx.annotation.RequiresApi;
 
 import java.io.File;
@@ -43,6 +44,8 @@ public class WifiScan  implements Scan {
 
     //OS throttles to 4 scans in 2 minutes so run at 30 seconds.
     private final static int timeInterval = 30000;
+
+    private FormatData formatData = new FormatData();
 
     private final static String TAG = "WiFiCScan";
 
@@ -95,14 +98,7 @@ public class WifiScan  implements Scan {
         try {
             List<ScanResult> results = wifiManager.getScanResults();
             for (ScanResult scan: results) {
-
-                String data = System.currentTimeMillis()
-                        + "," + scan.SSID
-                        + "," + scan.capabilities
-                        + ", " + scan.is80211mcResponder()
-                        + ", " + scan.level
-                        + "," + scan.frequency
-                        + "\n";
+                String data = formatData.formatWifi(scan);
                 new FileConnection(fileName).execute(data);
 
             }
