@@ -18,10 +18,7 @@ import android.content.Context;
 import android.util.SparseArray;
 
 import java.io.File;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
