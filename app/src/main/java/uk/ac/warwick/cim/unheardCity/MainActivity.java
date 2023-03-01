@@ -42,11 +42,10 @@ import java.io.IOException;
 
 
 /**
- * Main activity doesn't really do much, but start the service and then finish.
- * In oreo to run a background service when the app is not running it must
- * startForegroundService(Intent)  in the activity
- * in service, make a notification low or higher. persistent.
- * and startForeground (int id, Notification notification )
+ * Main activity sets up the files for this session, and begins the location
+ * collection.
+ *
+ * The interface allows the user to set up the scan function types.
  */
 
 public class MainActivity extends AppCompatActivity {
@@ -155,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.i("LOCATION", "Result");
                 if (locationResult.getLocations().isEmpty()) {
                     Log.i("LOCATION", "No results");
-                    return;
                 }
                 for (Location location : locationResult.getLocations()) {
                     Log.i("LOCATION", location.toString());
@@ -228,9 +226,9 @@ public class MainActivity extends AppCompatActivity {
             mediaRecorder.prepare();
 
         } catch (IOException ioe) {
-            Log.i("AudioRecorder", ioe.toString());
+            Log.i("AudioRecorder IO Exception", ioe.toString());
         } catch (IllegalStateException ise) {
-            Log.i("AudioRecorder", ise.toString());
+            Log.i("AudioRecorder Illegal State", ise.toString());
         }
 
     }
@@ -291,22 +289,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void checkPermissions(String accessFineLocation, String s) {
-        //Get permissions to find location
-        if (ContextCompat.checkSelfPermission(MainActivity.this, accessFineLocation)
-                != PackageManager.PERMISSION_GRANTED) {
-            Log.i("PERMISSIONS", s);
-            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
-                    accessFineLocation)) {
-                ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{accessFineLocation}, 1);
-            } else {
-                ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{accessFineLocation}, 1);
-            }
-        }
-    }
-
     protected void createLocationRequest() {
         locationRequest = LocationRequest.create();
         locationRequest.setInterval(10000);
@@ -332,31 +314,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Function to wrap location as a string.
-     * @param location
-     * @return
-     */
-    private String locationDetails (Location location) {
-        String details = "";
-        details = System.currentTimeMillis()
-                + "," + location.getLatitude()
-                + "," + location.getLongitude()
-                + "," + location.getAltitude()
-                + "," + location.getBearing()
-                + "," + location.getSpeed()
-                + "," + location.getVerticalAccuracyMeters()
-                + "," + location.getAccuracy()
-                + "\n";
-
-        return details;
-    }
-
-    /**
      * Set up the Bluetooth scanning
      */
     public void setUpBluetoothScan () {
 
-        //bluetoothScan = new BluetoothScan(this, bluetoothFile);
         bluetoothScan.start();
 
         Log.i(TAG, "Bluetooth ON");
@@ -436,7 +397,7 @@ public class MainActivity extends AppCompatActivity {
             wifiScan = new WifiScan(this, wifiManager, wifiFile);
             wifiScan.start();
         } catch (SecurityException se) {
-            Log.i("WIFI", se.toString());
+            Log.i("WIFI Security", se.toString());
         }
             catch (Exception e) {
             Log.i("WIFI", e.toString());
@@ -453,8 +414,8 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Function to handle the file name creation
-     * @param fileName
-     * @return
+     * @param fileName filename to write
+     * @return file
      */
     private File createDataFile(String fileName) {
         File fName = new File(this.getExternalFilesDir(null), fileName);
