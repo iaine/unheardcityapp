@@ -44,14 +44,14 @@ public class BluetoothLEScan implements Scan {
 
     private boolean scanning;
 
-    private Handler handler = new Handler();
+    private final Handler handler = new Handler();
 
     private Runnable bleScanRun;
 
     // Stops scanning after 2.5 seconds.
     private static final long SCAN_PERIOD = 2500;
 
-    private int timeInterval = 5000;
+    private final int timeInterval = 5000;
 
     public BluetoothLEScan(File fileName) {
         Log.i(TAG, "In Bluetooth");
