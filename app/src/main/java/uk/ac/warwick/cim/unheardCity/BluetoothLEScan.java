@@ -24,7 +24,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
+/**
+ * BluetoothLE scanning. Data is written to file.
+ *
+ * Runs every 5 seconds in a runnable process when stopped and started
+ * through the UI. Runs for 2.5 seconds.
+ *
+ */
 public class BluetoothLEScan implements Scan {
 
     private static final String TAG = "BLUETOOTH";

@@ -12,6 +12,12 @@ import android.util.Log;
 
 import java.io.File;
 
+/**
+ * Bluetooth scanner.
+ *
+ * Runs every 5 seconds in a runnable process when stopped and started
+ * through the UI.
+ */
 public class BluetoothScan implements Scan {
 
     protected Context ctx;
@@ -58,15 +64,6 @@ public class BluetoothScan implements Scan {
                     // object and its info from the Intent.
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-                    /*String data = System.currentTimeMillis()
-                            + ", " + device.getAddress()
-                            + ", " + device.getName()
-                            + ", " + device.getType();
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        data += ", " + device.getAlias();
-                    }
-                    data +=  "\n";*/
                     String data = formatData.formatBluetooth(device);
                     writeData(fName, data);
                 }
