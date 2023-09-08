@@ -23,6 +23,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.media.MediaRecorder;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
@@ -100,11 +101,23 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            String[] permissions = {Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_SCAN
+            };
+            checkPermissions(permissions);
+        } else {
+            String[] permissions = {Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            };
+            checkPermissions(permissions);
+        }
 
-        String[] permissions = {Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
-        checkPermissions(permissions);
 
         final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
 
@@ -213,16 +226,18 @@ public class MainActivity extends AppCompatActivity {
 
             mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
 
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+
+            mediaRecorder.setAudioSamplingRate(384000);
+
             //@todo: add location as well.
             File audioFile = new File(this.getExternalFilesDir(null),
                     System.currentTimeMillis() + ".mp4");
 
             mediaRecorder.setOutputFile(audioFile);
 
-            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-
             //let's stick to one channel for now. Maybe stereo later?
-            mediaRecorder.setAudioChannels(1);
+            mediaRecorder.setAudioChannels(2);
             mediaRecorder.prepare();
 
         } catch (IOException ioe) {
@@ -236,6 +251,8 @@ public class MainActivity extends AppCompatActivity {
     public void startRecordAudio (View view) {
         setUpRecordAudio();
         mediaRecorder.start();
+
+        mediaRecorder.getMaxAmplitude();
 
     }
 
