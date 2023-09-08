@@ -1,5 +1,7 @@
 package uk.ac.warwick.cim.unheardCity;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
@@ -11,21 +13,27 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
 import android.content.Context;
 import android.util.SparseArray;
 
+import androidx.core.app.ActivityCompat;
+
 import java.io.File;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-
-public class BluetoothLEDetails {
+/**
+ * BluetoothLE scanning. Data is written to file.
+ *
+ * Runs every 5 seconds in a runnable process when stopped and started
+ * through the UI. Runs for 2.5 seconds.
+ *
+ */
+public class BluetoothLEScan implements Scan {
 
     private static final String TAG = "BLUETOOTH";
 
@@ -41,18 +49,29 @@ public class BluetoothLEDetails {
 
     private boolean scanning;
 
-    private Handler handler = new Handler();
+    private final Handler handler = new Handler();
 
-    // Stops scanning after 10 seconds.
-    private static final long SCAN_PERIOD = 2000;
+    private Runnable bleScanRun;
 
-    public BluetoothLEDetails(File fileName) {
+    // Stops scanning after 2.5 seconds.
+    private static final long SCAN_PERIOD = 2500;
+
+    private final int timeInterval = 5000;
+
+    private Context ctx;
+
+    public BluetoothLEScan(File fileName) {
+        this.ctx = ctx;
         Log.i(TAG, "In Bluetooth");
         fName = fileName;
-        this.initBluetoothDetails();
     }
 
-    private void initBluetoothDetails() {
+    public void stop() {
+        this.stopScan();
+    }
+
+    @SuppressLint("MissingPermission")
+    public void start() {
         //final BluetoothManager bluetoothManager = (BluetoothManager) this.getSystemService(BluetoothManager.class);
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -61,29 +80,51 @@ public class BluetoothLEDetails {
             ((Activity) mContext).startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
 
-        this.scanLeDevice();
+        bleScanRun = new Runnable() {
+            @Override
+            public void run() {
+                scanLeDevice();
+                if (scanning) handler.postDelayed(this, timeInterval);
+                handler.postDelayed(this, timeInterval);
+            }
+        };
+        handler.postDelayed(bleScanRun, timeInterval);
 
     }
 
+
+    @SuppressLint("MissingPermission")
+    private void stopScan() {
+        scanning = false;
+        bluetoothLeScanner.stopScan(leScanCallback);
+        handler.removeCallbacks(bleScanRun);
+    }
+
+    @SuppressLint("MissingPermission")
     private void scanLeDevice() {
+
         bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
 
-            if(bluetoothLeScanner != null) {
-                if (!scanning) {
-                    // Stops scanning after a pre-defined scan period.
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            scanning = false;
-                            bluetoothLeScanner.stopScan(leScanCallback);
-                        }
-                    }, SCAN_PERIOD);
+        if (bluetoothLeScanner != null) {
 
-                    scanning = true;
-                    bluetoothLeScanner.startScan(leScanCallback);
+
+
+            if (!scanning) {
+                // Stops scanning after a pre-defined scan period.
+                handler.postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        scanning = false;
+                        bluetoothLeScanner.stopScan(leScanCallback);
+                    }
+                }, SCAN_PERIOD);
+
+                scanning = true;
+
+                bluetoothLeScanner.startScan(leScanCallback);
                 } else {
-                    scanning = false;
-                    bluetoothLeScanner.stopScan(leScanCallback);
+                    this.stopScan();
                 }
             }
         }
@@ -100,22 +141,23 @@ public class BluetoothLEDetails {
                     String m = mf(details.getManufacturerSpecificData());
 
                     String serviceUid = "No service";
-                    //if (details.getServiceUuids().size() > 0) {
-                    //List<ParcelUuid> uids = new List<ParcelUuid>();
+                    String serviceData = "No data";
+
                     List<ParcelUuid> uids = serviceID(details);
-                    //if (uids != null && uids.size() > 0) {
+
                     if (uids != null) {
 
-                            //List<ParcelUuid> uids = serviceID(details);
                         StringBuilder ids = new StringBuilder();
                         for (ParcelUuid pUid: uids) {
                             serviceUid = pUid.getUuid().toString();
+                            serviceData = sfd(pUid, details);
 
                             ids.append(pUid.getUuid().toString() + ",");
                             Log.i(TAG, "UUID " + serviceUid + " file " + pUid.describeContents());
                         }
                         serviceUid = ids.toString();
                     }
+                    Log.i(TAG, "Service " +  serviceData);
                     Log.i(TAG, "manufacturer: " + getManufacturerData(details.getManufacturerSpecificData(), details));
                     String data = System.currentTimeMillis()
                             + ", " + result.getDevice()
@@ -130,7 +172,7 @@ public class BluetoothLEDetails {
                             + ", " + m
                             + ", " + mfd(m, details )
                             + ", " + serviceUid
-                            //+ ", " + sfd(s, details)
+                            + ", " + serviceData
                             + "\n";
                     writeData(data);
                     System.out.println(details.toString());
@@ -152,8 +194,13 @@ public class BluetoothLEDetails {
 
     private String sfd(ParcelUuid uuid, ScanRecord r) {
         byte[] serviceData = r.getServiceData(uuid);
+        if (serviceData != null) {
+            String str = new String();
+            return str.valueOf(byteArrayToHex(serviceData).toCharArray());
+            //return ByteArrayToString(serviceData);
+        }
 
-        return new String(serviceData, StandardCharsets.UTF_8);
+        return "No device";
     }
 
     private String mf (SparseArray<byte[]> manufacturer) {
@@ -224,7 +271,7 @@ public class BluetoothLEDetails {
     {
         StringBuilder hex = new StringBuilder(ba.length * 2);
         for (byte b : ba)
-            hex.append(b + " ");
+            hex.append((char)b + " ");
 
         return hex.toString();
     }

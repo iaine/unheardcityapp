@@ -20,7 +20,6 @@ public class FileConnection extends AsyncTask<String,String,String> {
     }
 
     public FileConnection (File fName) {
-        new signalCityApplication();
         fileName = fName;
     }
 
