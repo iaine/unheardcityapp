@@ -77,6 +77,8 @@ public class MainActivity extends AppCompatActivity {
 
     private int wifi = 0;
 
+    private int base = 0;
+
     private WifiManager wifiManager;
 
     protected WifiScan wifiScan;
@@ -456,15 +458,12 @@ public class MainActivity extends AppCompatActivity {
      * @param view
      */
     public void baseScanStart (View view) {
-        baseStationScan.stop();
+        if (base == 1) {
+            baseStationScan.stop();
+        } else {
+            baseStationScan.start();
+        }
     }
 
-    /**
-     * Stop the base station scan
-     * @param view
-     */
-    public void baseScanStop (View view) {
-        baseStationScan.stop();
-    }
 
 }
