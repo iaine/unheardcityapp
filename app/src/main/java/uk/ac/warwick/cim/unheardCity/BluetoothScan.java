@@ -1,11 +1,13 @@
 package uk.ac.warwick.cim.unheardCity;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.util.Log;
 
@@ -38,8 +40,8 @@ public class BluetoothScan implements Scan {
     private final FormatData formatData = new FormatData();
 
     protected BluetoothScan(Context context, File file) {
-        //ctx = context;
-        ctx = signalCityApplication.getAppContext();
+        ctx = context;
+        //ctx = signalCityApplication.getAppContext();
         fName = file;
     }
 
@@ -48,6 +50,16 @@ public class BluetoothScan implements Scan {
         blueScanRunner = new Runnable() {
             @Override
             public void run() {
+                /*if (ActivityCompat.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    Activity#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for Activity#requestPermissions for more details.
+                    return;
+                }*/
                 bluetoothAdapter.startDiscovery();
                 handler.postDelayed(this, timeInterval);
             }
