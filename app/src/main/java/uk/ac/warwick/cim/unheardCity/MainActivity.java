@@ -89,6 +89,8 @@ public class MainActivity extends AppCompatActivity {
 
     private  FormatData formatData = new FormatData();
 
+    private BaseStationScan baseStationScan;
+
     public MainActivity() {
         requestingLocationUpdates = true;
     }
@@ -449,5 +451,20 @@ public class MainActivity extends AppCompatActivity {
         return fName;
     }
 
+    /**
+     * Start the base station scan
+     * @param view
+     */
+    public void baseScanStart (View view) {
+        baseStationScan.stop();
+    }
+
+    /**
+     * Stop the base station scan
+     * @param view
+     */
+    public void baseScanStop (View view) {
+        baseStationScan.stop();
+    }
 
 }
