@@ -1,5 +1,7 @@
 package uk.ac.warwick.cim.unheardCity;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
@@ -11,11 +13,14 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
 import android.content.Context;
 import android.util.SparseArray;
+
+import androidx.core.app.ActivityCompat;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -53,13 +58,19 @@ public class BluetoothLEScan implements Scan {
 
     private final int timeInterval = 5000;
 
+    private Context ctx;
+
     public BluetoothLEScan(File fileName) {
+        this.ctx = ctx;
         Log.i(TAG, "In Bluetooth");
         fName = fileName;
     }
 
-    public void stop() { this.stopScan();}
+    public void stop() {
+        this.stopScan();
+    }
 
+    @SuppressLint("MissingPermission")
     public void start() {
         //final BluetoothManager bluetoothManager = (BluetoothManager) this.getSystemService(BluetoothManager.class);
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -81,28 +92,37 @@ public class BluetoothLEScan implements Scan {
 
     }
 
+
+    @SuppressLint("MissingPermission")
     private void stopScan() {
         scanning = false;
         bluetoothLeScanner.stopScan(leScanCallback);
         handler.removeCallbacks(bleScanRun);
     }
 
+    @SuppressLint("MissingPermission")
     private void scanLeDevice() {
+
         bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
 
-            if(bluetoothLeScanner != null) {
-                if (!scanning) {
-                    // Stops scanning after a pre-defined scan period.
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            scanning = false;
-                            bluetoothLeScanner.stopScan(leScanCallback);
-                        }
-                    }, SCAN_PERIOD);
+        if (bluetoothLeScanner != null) {
 
-                    scanning = true;
-                    bluetoothLeScanner.startScan(leScanCallback);
+
+
+            if (!scanning) {
+                // Stops scanning after a pre-defined scan period.
+                handler.postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        scanning = false;
+                        bluetoothLeScanner.stopScan(leScanCallback);
+                    }
+                }, SCAN_PERIOD);
+
+                scanning = true;
+
+                bluetoothLeScanner.startScan(leScanCallback);
                 } else {
                     this.stopScan();
                 }
