@@ -2,6 +2,7 @@ package uk.ac.warwick.cim.unheardCity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 
@@ -93,6 +94,8 @@ public class MainActivity extends AppCompatActivity {
 
     private BaseStationScan baseStationScan;
 
+    private File baseStationFile;
+
     public MainActivity() {
         requestingLocationUpdates = true;
     }
@@ -105,24 +108,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            String[] permissions = {Manifest.permission.RECORD_AUDIO,
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.BLUETOOTH_CONNECT,
-                    Manifest.permission.BLUETOOTH_SCAN
-            };
-            checkPermissions(permissions);
-        } else {
-            String[] permissions = {Manifest.permission.RECORD_AUDIO,
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-            };
-            checkPermissions(permissions);
-        }
 
-
-
+        String[] permissions = {Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH_SCAN
+        };
+        checkPermissions(permissions);
+        
         final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
 
         if ( !manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
@@ -138,9 +132,11 @@ public class MainActivity extends AppCompatActivity {
         locationFile = this.createDataFile("locations_" + currentTime + ".txt");
         bluetoothFile = this.createDataFile("bluetooth_" + currentTime + ".txt");
         wifiFile = this.createDataFile("wifi_" + currentTime + ".txt");
+        baseStationFile = this.createDataFile("stations_" + currentTime + ".txt");
 
-        bleScanner = new BluetoothLEScan(signalFile);
+        bleScanner = new BluetoothLEScan(signalFile, this);
         bluetoothScan = new BluetoothScan(this, bluetoothFile);
+        baseStationScan = new BaseStationScan(this, baseStationFile);
 
         // set up location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -157,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
                             new FileConnection(locationFile).writeFile(data);
                         }else {
                             Log.i("LOCATION", "No Location");
-                            new BluetoothLEScan(signalFile);
+                            new BluetoothLEScan(signalFile, MainActivity.this);
                         }
                     }
 
@@ -364,7 +360,10 @@ public class MainActivity extends AppCompatActivity {
         if (BLE == 1) {
             stopBluetoothLEscan();
         } else {
-            setUpBluetoothLEscan();
+            Context ctx = view.getContext().getApplicationContext();
+            if (ctx != null) {
+                setUpBluetoothLEscan(ctx);
+            }
         }
     }
 
@@ -389,8 +388,18 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Start the Bluetooth LE Scan
      */
-    private void setUpBluetoothLEscan() {
+    private void setUpBluetoothLEscan(Context ctx) {
         Log.i(TAG, "BluetoothLE ON");
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_CONNECT)
+                != PackageManager.PERMISSION_GRANTED) {
+            try {
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.BLUETOOTH_CONNECT,
+                                Manifest.permission.BLUETOOTH_SCAN}, 1);
+            } catch (Exception e) {
+                Log.i(TAG, e.toString());
+            }
+        }
         //stop bluetooth scan if running.
         if (Bluetooth == 1) {
             stopBluetoothScan();
@@ -465,5 +474,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void baseScanStop (View view) {
+        baseStationScan.stop();
+        base = 0;
+    }
 
 }
