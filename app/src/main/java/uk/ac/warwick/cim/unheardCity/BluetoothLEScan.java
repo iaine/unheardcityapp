@@ -21,6 +21,7 @@ import android.content.Context;
 import android.util.SparseArray;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -60,8 +61,8 @@ public class BluetoothLEScan implements Scan {
 
     private Context ctx;
 
-    public BluetoothLEScan(File fileName) {
-        this.ctx = ctx;
+    public BluetoothLEScan(File fileName, Context ctx) {
+        mContext = ctx;
         Log.i(TAG, "In Bluetooth");
         fName = fileName;
     }
@@ -72,7 +73,6 @@ public class BluetoothLEScan implements Scan {
 
     @SuppressLint("MissingPermission")
     public void start() {
-        //final BluetoothManager bluetoothManager = (BluetoothManager) this.getSystemService(BluetoothManager.class);
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
@@ -100,19 +100,19 @@ public class BluetoothLEScan implements Scan {
         handler.removeCallbacks(bleScanRun);
     }
 
+
     @SuppressLint("MissingPermission")
     private void scanLeDevice() {
 
         bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
 
         if (bluetoothLeScanner != null) {
-
-
-
             if (!scanning) {
+
                 // Stops scanning after a pre-defined scan period.
                 handler.postDelayed(new Runnable() {
 
+                    @SuppressLint("MissingPermission")
                     @Override
                     public void run() {
                         scanning = false;

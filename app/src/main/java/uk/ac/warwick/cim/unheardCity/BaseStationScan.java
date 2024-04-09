@@ -1,8 +1,11 @@
 package uk.ac.warwick.cim.unheardCity;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.Handler;
 import android.telephony.CellIdentityGsm;
 import android.telephony.CellIdentityLte;
 import android.telephony.CellIdentityNr;
@@ -15,6 +18,8 @@ import android.telephony.CellSignalStrengthLte;
 import android.telephony.CellSignalStrengthNr;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+
+import androidx.core.app.ActivityCompat;
 
 import java.io.File;
 import java.util.List;
@@ -33,6 +38,14 @@ public class BaseStationScan implements Scan {
 
     private static String TAG= "TELEPHONY";
 
+    private Runnable baseScan;
+
+    private final Handler handler = new Handler();
+
+    private final int timeInterval = 5000;
+
+    private boolean scanning = false;
+
     protected BaseStationScan(Context ctx, File fileName) {
         fName = fileName;
         this.context = ctx;
@@ -41,30 +54,43 @@ public class BaseStationScan implements Scan {
     @SuppressLint("MissingPermission")
     public void start() {
         telephonyManager = (TelephonyManager) this.context.getSystemService(this.context.TELEPHONY_SERVICE);
+        scanning = true;
+        baseScan = new Runnable() {
+            @Override
+            public void run() {
+                scanning(telephonyManager);
+                if (scanning) handler.postDelayed(this, timeInterval);
+        }
+            };
+            handler.postDelayed(baseScan, timeInterval);
+    }
 
-        /*if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }*/
+    private void scanning (TelephonyManager telephonyManager) {
+        if (ActivityCompat.checkSelfPermission(this.context, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            try {
+                ActivityCompat.requestPermissions(MainActivity.class.newInstance().getParent(),
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            } catch (InstantiationException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         List<CellInfo> stations = telephonyManager.getAllCellInfo();
         if (stations != null) {
-            for (final CellInfo station: stations) {
+            for (final CellInfo station : stations) {
                 String data = "";
                 if (station instanceof CellInfoGsm) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         CellInfoGsm cellInfoGsm = (CellInfoGsm) station;
                         Log.i(TAG, cellInfoGsm.toString());
                         data += "GSM, ";
-                        data += cellInfoGsm.getCellIdentity().getLac()  + ",";
+                        data += cellInfoGsm.getCellIdentity().getLac() + ",";
                         data += station.getCellSignalStrength().getDbm() + ",";
                         data += "0,"; // rssi
-                        data += station.getCellIdentity().getOperatorAlphaLong().toString() +", ";
+                        data += station.getCellIdentity().getOperatorAlphaLong().toString() + ", ";
                         CellIdentityGsm ciGsm = (CellIdentityGsm) station.getCellIdentity();
                         data += ciGsm.getMobileNetworkOperator().toString() + ", ";
                         data += "0 \n";
@@ -80,11 +106,11 @@ public class BaseStationScan implements Scan {
                         data += station.getCellIdentity().getOperatorAlphaLong().toString(); //alpha long
                         CellIdentityLte ciLte = (CellIdentityLte) station.getCellIdentity();
                         Log.i(TAG, ciLte.toString());
-                        data += ciLte .getBandwidth();
+                        data += ciLte.getBandwidth();
                         data += ciLte.getMobileNetworkOperator();
                         int[] ibands = ciLte.getBands();
                         String bands = "";
-                        for (int band: ibands) {
+                        for (int band : ibands) {
                             bands += String.valueOf(band) + ";";
                         }
                         data += bands + ", "; //bands
@@ -101,12 +127,12 @@ public class BaseStationScan implements Scan {
                             CellSignalStrengthNr cellSignalStrength = (CellSignalStrengthNr) station.getCellSignalStrength();
                             data += cellSignalStrength.getDbm() + ",";
                             data += cellSignalStrength.getLevel() + ",";
-                            data += ciNr.getOperatorAlphaLong()  + ",";
-                            data += ciNr.getNrarfcn()  + ",";
+                            data += ciNr.getOperatorAlphaLong() + ",";
+                            data += ciNr.getNrarfcn() + ",";
                             data += ciNr.getMncString() + " " + ciNr.getMccString();
                             int[] ibands = ciNr.getBands();
                             String bands = "";
-                            for (int band: ibands) {
+                            for (int band : ibands) {
                                 bands += String.valueOf(band) + ",";
                             }
                             data += bands + ", "; //bands
@@ -121,7 +147,9 @@ public class BaseStationScan implements Scan {
         }
     }
 
-    public void stop () {}
+    public void stop () {
+        scanning = false;
+    }
 
     private void writeData (String data) {
         try {

@@ -11,6 +11,8 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.util.Log;
 
+import androidx.core.app.ActivityCompat;
+
 import java.io.File;
 
 /**
@@ -50,16 +52,16 @@ public class BluetoothScan implements Scan {
         blueScanRunner = new Runnable() {
             @Override
             public void run() {
-                /*if (ActivityCompat.checkSelfPermission(Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    Activity#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for Activity#requestPermissions for more details.
-                    return;
-                }*/
+                if (ActivityCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+                    try {
+                        ActivityCompat.requestPermissions(MainActivity.class.newInstance().getParent(),
+                                new String[]{Manifest.permission.BLUETOOTH_CONNECT}, 1);
+                    } catch (IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    } catch (InstantiationException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
                 bluetoothAdapter.startDiscovery();
                 handler.postDelayed(this, timeInterval);
             }
@@ -86,6 +88,17 @@ public class BluetoothScan implements Scan {
     }
 
     public void stop() {
+        if (ActivityCompat.checkSelfPermission(ctx, Manifest.permission.BLUETOOTH_SCAN)
+                != PackageManager.PERMISSION_GRANTED) {
+            try {
+                ActivityCompat.requestPermissions(MainActivity.class.newInstance().getParent(),
+                        new String[]{Manifest.permission.BLUETOOTH_SCAN}, 1);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            } catch (InstantiationException e) {
+                throw new RuntimeException(e);
+            }
+        }
         bluetoothAdapter.cancelDiscovery();
         ctx.unregisterReceiver(receiver);
         handler.removeCallbacks(blueScanRunner);
