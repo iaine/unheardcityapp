@@ -90,4 +90,14 @@
         tools:layout_editor_absoluteX="217dp"
         tools:layout_editor_absoluteY="575dp" />
 
+    <Button
+        android:id="@+id/button7"
+        android:layout_width="180dp"
+        android:layout_height="51dp"
+        android:onClick="baseScanStart"
+        android:text="Scan Base Stations"
+        app:layout_constraintTop_toBottomOf="@+id/button3"
+        app:layout_constraintRight_toRightOf="@+id/button5"
+        tools:layout_editor_absoluteX="217dp"
+        tools:layout_editor_absoluteY="575dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>
