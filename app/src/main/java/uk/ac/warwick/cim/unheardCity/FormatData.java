@@ -1,16 +1,19 @@
 package uk.ac.warwick.cim.unheardCity;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.le.ScanRecord;
 import android.location.Location;
 import android.net.wifi.ScanResult;
 import android.os.Build;
 
-import java.io.File;
-
 public class FormatData {
 
-    public void formatBluetoothLE () {}
+    public void formatBluetoothLE (ScanRecord scanRecord) {
 
+    }
+
+    @SuppressLint("MissingPermission")
     public String formatBluetooth (BluetoothDevice device) {
         String data = System.currentTimeMillis()
                 + ", " + device.getAddress()
