@@ -1,5 +1,7 @@
 package uk.ac.warwick.cim.unheardCity;
 
+import static androidx.core.content.ContextCompat.getSystemService;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -27,9 +29,11 @@ import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Looper;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -137,6 +141,11 @@ public class MainActivity extends AppCompatActivity {
         bleScanner = new BluetoothLEScan(signalFile, this);
         bluetoothScan = new BluetoothScan(this, bluetoothFile);
         baseStationScan = new BaseStationScan(this, baseStationFile);
+
+        Vibrator vibrator = (Vibrator) this.getSystemService(this.VIBRATOR_SERVICE);
+        if (!vibrator.hasVibrator()) Toast.makeText(this, "Vibration not taken",
+                Toast.LENGTH_SHORT);
+        Haptic haptic = new Haptic(vibrator);
 
         // set up location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
