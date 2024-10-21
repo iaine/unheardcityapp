@@ -1,6 +1,5 @@
 package uk.ac.warwick.cim.unheardCity;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -13,15 +12,11 @@ import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanRecord;
 import android.bluetooth.le.ScanResult;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.util.Log;
 import android.content.Context;
 import android.util.SparseArray;
-
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -84,7 +79,6 @@ public class BluetoothLEScan implements Scan {
             @Override
             public void run() {
                 scanLeDevice();
-                if (scanning) handler.postDelayed(this, timeInterval);
                 handler.postDelayed(this, timeInterval);
             }
         };
@@ -159,21 +153,26 @@ public class BluetoothLEScan implements Scan {
                     }
                     Log.i(TAG, "Service " +  serviceData);
                     Log.i(TAG, "manufacturer: " + getManufacturerData(details.getManufacturerSpecificData(), details));
-                    String data = System.currentTimeMillis()
-                            + ", " + result.getDevice()
-                            + ", " + result.getRssi()
-                            + ", " + result.getPrimaryPhy()
-                            + ", " + result.getSecondaryPhy()
-                            + ", " + result.getPeriodicAdvertisingInterval()
-                            + ", " + details.getDeviceName()
-                            + ", " + details.getManufacturerSpecificData().toString()
-                            + ", " + details.getTxPowerLevel()
-                            + ", " + details.getAdvertiseFlags()
-                            + ", " + m
-                            + ", " + mfd(m, details )
-                            + ", " + serviceUid
-                            + ", " + serviceData
-                            + "\n";
+                    String data = null;
+
+                        data = System.currentTimeMillis()
+                                + ", " + result.getDevice()
+                                + ", " + result.getRssi()
+                                + ", " + details.getDeviceName()
+                                + ", " + details.getManufacturerSpecificData().toString()
+                                + ", " + details.getTxPowerLevel()
+                                + ", " + details.getAdvertiseFlags()
+                                + ", " + m
+                                + ", " + mfd(m, details )
+                                + ", " + serviceUid
+                                + ", " + serviceData;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                data += ", " + result.getPrimaryPhy()
+                                + ", " + result.getSecondaryPhy()
+                                + ", " + result.getPeriodicAdvertisingInterval();
+
+                    }
+                    data += "\n";
                     writeData(data);
                     System.out.println(details.toString());
                 }
