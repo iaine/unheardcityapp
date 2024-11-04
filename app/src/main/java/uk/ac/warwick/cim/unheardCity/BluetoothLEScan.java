@@ -24,7 +24,6 @@ import java.util.List;
 
 /**
  * BluetoothLE scanning. Data is written to file.
- *
  * Runs every 5 seconds in a runnable process when stopped and started
  * through the UI. Runs for 2.5 seconds.
  *
@@ -37,7 +36,7 @@ public class BluetoothLEScan implements Scan {
 
     private final File fName;
 
-    private Context mContext;
+    private final Context mContext;
 
     private BluetoothAdapter bluetoothAdapter;
 
@@ -89,7 +88,7 @@ public class BluetoothLEScan implements Scan {
 
     @SuppressLint("MissingPermission")
     private void stopScan() {
-        scanning = false;
+        //scanning = false;
         bluetoothLeScanner.stopScan(leScanCallback);
         handler.removeCallbacks(bleScanRun);
     }
@@ -101,7 +100,7 @@ public class BluetoothLEScan implements Scan {
         bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
 
         if (bluetoothLeScanner != null) {
-            if (!scanning) {
+            //if (!scanning) {
 
                 // Stops scanning after a pre-defined scan period.
                 handler.postDelayed(new Runnable() {
@@ -109,17 +108,17 @@ public class BluetoothLEScan implements Scan {
                     @SuppressLint("MissingPermission")
                     @Override
                     public void run() {
-                        scanning = false;
+                        //scanning = false;
                         bluetoothLeScanner.stopScan(leScanCallback);
                     }
                 }, SCAN_PERIOD);
 
-                scanning = true;
+                //scanning = true;
 
                 bluetoothLeScanner.startScan(leScanCallback);
-                } else {
+                /*} else {
                     this.stopScan();
-                }
+                }*/
             }
         }
 
@@ -153,9 +152,7 @@ public class BluetoothLEScan implements Scan {
                     }
                     Log.i(TAG, "Service " +  serviceData);
                     Log.i(TAG, "manufacturer: " + getManufacturerData(details.getManufacturerSpecificData(), details));
-                    String data = null;
-
-                        data = System.currentTimeMillis()
+                    String data = System.currentTimeMillis()
                                 + ", " + result.getDevice()
                                 + ", " + result.getRssi()
                                 + ", " + details.getDeviceName()
