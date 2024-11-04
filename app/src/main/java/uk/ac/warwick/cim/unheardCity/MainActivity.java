@@ -1,10 +1,7 @@
 package uk.ac.warwick.cim.unheardCity;
 
-import static androidx.core.content.ContextCompat.getSystemService;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 
@@ -50,7 +47,6 @@ import java.io.IOException;
 /**
  * Main activity sets up the files for this session, and begins the location
  * collection.
- *
  * The interface allows the user to set up the scan function types.
  */
 
@@ -70,9 +66,9 @@ public class MainActivity extends AppCompatActivity {
 
     private File locationFile;
 
-    private File bluetoothFile;
-
     private File wifiFile;
+
+    private File baseStationFile;
 
     private BroadcastReceiver receiver;
 
@@ -80,9 +76,6 @@ public class MainActivity extends AppCompatActivity {
 
     private int BLE = 0;
 
-    private int wifi = 0;
-
-    private int base = 0;
 
     private WifiManager wifiManager;
 
@@ -97,8 +90,6 @@ public class MainActivity extends AppCompatActivity {
     private  FormatData formatData = new FormatData();
 
     private BaseStationScan baseStationScan;
-
-    private File baseStationFile;
 
     public MainActivity() {
         requestingLocationUpdates = true;
@@ -134,18 +125,22 @@ public class MainActivity extends AppCompatActivity {
         long currentTime = System.currentTimeMillis();
         signalFile = this.createDataFile("bluetoothle_" + currentTime + ".txt");
         locationFile = this.createDataFile("locations_" + currentTime + ".txt");
-        bluetoothFile = this.createDataFile("bluetooth_" + currentTime + ".txt");
         wifiFile = this.createDataFile("wifi_" + currentTime + ".txt");
         baseStationFile = this.createDataFile("stations_" + currentTime + ".txt");
 
         bleScanner = new BluetoothLEScan(signalFile, this);
-        bluetoothScan = new BluetoothScan(this, bluetoothFile);
+        wifiScan = new WifiScan(this, wifiManager, wifiFile);
         baseStationScan = new BaseStationScan(this, baseStationFile);
 
-        Vibrator vibrator = (Vibrator) this.getSystemService(this.VIBRATOR_SERVICE);
+        /*Vibrator vibrator = (Vibrator) this.getSystemService(this.VIBRATOR_SERVICE);
         if (!vibrator.hasVibrator()) Toast.makeText(this, "Vibration not taken",
                 Toast.LENGTH_SHORT);
-        Haptic haptic = new Haptic(vibrator);
+        Haptic haptic = new Haptic(vibrator);*/
+
+        this.setUpBluetoothLEscan();
+        this.startWiFiScan();
+        this.baseScanStart();
+        Toast.makeText(this, "Beginning scans", Toast.LENGTH_SHORT);
 
         // set up location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
@@ -156,7 +151,6 @@ public class MainActivity extends AppCompatActivity {
                     public void onSuccess(Location location) {
                         // Got last known location. In some rare situations this can be null.
                         if (location != null) {
-                            Log.i("LOCATION", location.toString());
                             //String data = locationDetails(location);
                             String data = formatData.formatLocation(location);
                             new FileConnection(locationFile).writeFile(data);
@@ -243,7 +237,9 @@ public class MainActivity extends AppCompatActivity {
             File audioFile = new File(this.getExternalFilesDir(null),
                     System.currentTimeMillis() + ".mp4");
 
-            mediaRecorder.setOutputFile(audioFile);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                mediaRecorder.setOutputFile(audioFile);
+            }
 
             //let's stick to one channel for now. Maybe stereo later?
             mediaRecorder.setAudioChannels(2);
@@ -278,12 +274,22 @@ public class MainActivity extends AppCompatActivity {
         if (requestingLocationUpdates) {
             startLocationUpdates();
         }
+
+        this.setUpBluetoothLEscan();
+
+        this.startWiFiScan();
+
+        baseStationScan.start();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         stopLocationUpdates();
+
+        /*this.stopBluetoothLEscan();
+        this.stopWiFiScan();
+        baseStationScan.stop();*/
     }
 
     @Override
@@ -340,50 +346,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Set up the Bluetooth scanning
-     */
-    public void setUpBluetoothScan () {
-
-        bluetoothScan.start();
-
-        Log.i(TAG, "Bluetooth ON");
-        if (BLE == 1) {
-            stopBluetoothLEscan();
-        }
-
-        if (BLE == 1) {
-            BLE = 0;
-        }
-        Bluetooth = 1;
-    }
-
-    public void bScan (View view) {
-        if (Bluetooth == 1) {
-            stopBluetoothScan();
-        } else {
-            setUpBluetoothScan();
-        }
-    }
-
-    public void bleScan (View view) {
-        if (BLE == 1) {
-            stopBluetoothLEscan();
-        } else {
-            Context ctx = view.getContext().getApplicationContext();
-            if (ctx != null) {
-                setUpBluetoothLEscan(ctx);
-            }
-        }
-    }
-
-    public void wifiScan (View view) {
-        if (wifi == 1) {
-            stopWiFiScan();
-        } else {
-            startWiFiScan();
-        }
-    }
-    /**
      * Function to stop the scan if we change protocols
      * Set the Bluetooth scan flag to 0.
      */
@@ -391,13 +353,12 @@ public class MainActivity extends AppCompatActivity {
         bluetoothScan.stop();
         Log.i(TAG, "Bluetooth OFF");
         //unregisterReceiver(receiver);
-        Bluetooth = 0;
     }
 
     /**
      * Start the Bluetooth LE Scan
      */
-    private void setUpBluetoothLEscan(Context ctx) {
+    private void setUpBluetoothLEscan() {
         Log.i(TAG, "BluetoothLE ON");
         if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_CONNECT)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -415,7 +376,7 @@ public class MainActivity extends AppCompatActivity {
         }
         //@todo: set this up as a runnable for ever 5 seconds
         //@todo: set up a UI button to set scan time and put in warning.
-        BLE = 1;
+        //BLE = 1;
         bleScanner.start();
     }
 
@@ -428,9 +389,10 @@ public class MainActivity extends AppCompatActivity {
         bleScanner.stop();
     }
 
+    @SuppressLint("WifiManagerLeak")
     private void startWiFiScan() {
         Log.i(TAG, "WiFi ON");
-        wifi = 1;
+        //wifi = 1;
         wifiManager = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         try {
             wifiScan = new WifiScan(this, wifiManager, wifiFile);
@@ -446,7 +408,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void stopWiFiScan() {
         Log.i(TAG, "WiFi OFF");
-        wifi = 0;
+        //wifi = 0;
         wifiScan.stop();
 
     }
@@ -473,19 +435,14 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Start the base station scan
-     * @param view
+
      */
-    public void baseScanStart (View view) {
-        if (base == 1) {
-            baseStationScan.stop();
-        } else {
-            baseStationScan.start();
-        }
+    public void baseScanStart () {
+        baseStationScan.start();
     }
 
-    public void baseScanStop (View view) {
+    public void baseScanStop () {
         baseStationScan.stop();
-        base = 0;
     }
 
 }
