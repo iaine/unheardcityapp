@@ -16,7 +16,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.util.Log;
 
-import androidx.annotation.FractionRes;
 import androidx.annotation.RequiresApi;
 
 import java.io.File;
@@ -26,7 +25,6 @@ import java.util.concurrent.Executor;
 /**
  * WiFi scanner runs ever 30 seconds or so - limited by Android OS to 4 scans
  * per 2 minutes. Data is written to the file.
- *
  * WiFiRanging is included but not active at the moment.
  */
 public class WifiScan  implements Scan {
@@ -52,7 +50,7 @@ public class WifiScan  implements Scan {
 
     private FormatData formatData = new FormatData();
 
-    private final static String TAG = "WiFiCScan";
+    private final static String TAG = "WiFiScan";
 
     protected WifiScan (Context context, WifiManager wManager, File file) {
         wifiManager = wManager;
@@ -104,7 +102,7 @@ public class WifiScan  implements Scan {
             List<ScanResult> results = wifiManager.getScanResults();
             for (ScanResult scan: results) {
                 String data = formatData.formatWifi(scan);
-                new FileConnection(fileName).execute(data);
+                this.writeData(data);
 
             }
         }  catch (Exception e ) {
@@ -116,6 +114,14 @@ public class WifiScan  implements Scan {
         // handle failure: new scan did NOT succeed
         // Provide a message
         Log.i("WIFI", "Scan wifi failed");
+    }
+
+    private void writeData (String data) {
+        try {
+            new FileConnection(wifiFile).writeFile(data);
+        } catch (Exception e) {
+            Log.i(TAG, e.toString());
+        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.P)
