@@ -66,7 +66,7 @@ public class BaseStationScan implements Scan {
     }
 
     private void scanning (TelephonyManager telephonyManager) {
-        if (ActivityCompat.checkSelfPermission(this.context, Manifest.permission.ACCESS_FINE_LOCATION)
+        /*if (ActivityCompat.checkSelfPermission(this.context, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             try {
                 ActivityCompat.requestPermissions(MainActivity.class.newInstance().getParent(),
@@ -76,12 +76,12 @@ public class BaseStationScan implements Scan {
             } catch (InstantiationException e) {
                 throw new RuntimeException(e);
             }
-        }
+        }*/
 
-        List<CellInfo> stations = telephonyManager.getAllCellInfo();
+        @SuppressLint("MissingPermission") List<CellInfo> stations = telephonyManager.getAllCellInfo();
         if (stations != null) {
             for (final CellInfo station : stations) {
-                String data = "";
+                String data = System.currentTimeMillis() + " ,";
                 if (station instanceof CellInfoGsm) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                         CellInfoGsm cellInfoGsm = (CellInfoGsm) station;
