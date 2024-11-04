@@ -2,16 +2,12 @@ package uk.ac.warwick.cim.unheardCity;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.le.ScanRecord;
 import android.location.Location;
 import android.net.wifi.ScanResult;
 import android.os.Build;
 
 public class FormatData {
 
-    public void formatBluetoothLE (ScanRecord scanRecord) {
-
-    }
 
     @SuppressLint("MissingPermission")
     public String formatBluetooth (BluetoothDevice device) {
@@ -31,7 +27,7 @@ public class FormatData {
     }
 
     public String formatWifi (ScanResult scan) {
-        String data = System.currentTimeMillis()
+        var data = System.currentTimeMillis()
                 + "," + scan.SSID
                 + "," + scan.capabilities
                 + ", " + scan.is80211mcResponder()
@@ -42,16 +38,17 @@ public class FormatData {
     }
 
     public String formatLocation (Location location) {
-        String details = "";
-        details = System.currentTimeMillis()
-                + "," + location.getLatitude()
-                + "," + location.getLongitude()
-                + "," + location.getAltitude()
-                + "," + location.getBearing()
-                + "," + location.getSpeed()
-                + "," + location.getVerticalAccuracyMeters()
-                + "," + location.getAccuracy()
-                + "\n";
+        String details = System.currentTimeMillis()
+                    + "," + location.getLatitude()
+                    + "," + location.getLongitude()
+                    + "," + location.getAltitude()
+                    + "," + location.getBearing()
+                    + "," + location.getSpeed();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            details += "," + location.getAccuracy();
+        }
+        details +=  "," + location.getAccuracy() +"\n";
         return details;
     }
 }
