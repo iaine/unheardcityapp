@@ -96,7 +96,11 @@ public class BaseStationScan implements Scan {
                         data += "0,"; // rssi
                         data += station.getCellIdentity().getOperatorAlphaLong().toString() + ", ";
                         CellIdentityGsm ciGsm = (CellIdentityGsm) station.getCellIdentity();
-                        data += ciGsm.getMobileNetworkOperator().toString() + ", ";
+                        if (ciGsm.getMobileNetworkOperator() != null) {
+                            data += ciGsm.getMobileNetworkOperator().toString() + ", ";
+                        } else {
+                            data += "0, ";
+                        }
                         data += "0 \n";
                     }
                 } else if (station instanceof CellInfoLte) {
