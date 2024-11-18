@@ -36,7 +36,7 @@ public class BaseStationScan implements Scan {
 
     private Context context;
 
-    private static String TAG= "TELEPHONY";
+    private static String TAG = "TELEPHONY";
 
     private Runnable baseScan;
 
@@ -44,7 +44,7 @@ public class BaseStationScan implements Scan {
 
     private final int timeInterval = 5000;
 
-    private boolean scanning = false;
+    private boolean scanning = true;
 
     protected BaseStationScan(Context ctx, File fileName) {
         fName = fileName;
@@ -60,13 +60,13 @@ public class BaseStationScan implements Scan {
             public void run() {
                 scanning(telephonyManager);
                 if (scanning) handler.postDelayed(this, timeInterval);
-        }
-            };
-            handler.postDelayed(baseScan, timeInterval);
+            }
+        };
+        handler.postDelayed(baseScan, timeInterval);
     }
 
-    private void scanning (TelephonyManager telephonyManager) {
-        /*if (ActivityCompat.checkSelfPermission(this.context, Manifest.permission.ACCESS_FINE_LOCATION)
+    private void scanning(TelephonyManager telephonyManager) {
+        if (ActivityCompat.checkSelfPermission(this.context, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             try {
                 ActivityCompat.requestPermissions(MainActivity.class.newInstance().getParent(),
@@ -76,9 +76,13 @@ public class BaseStationScan implements Scan {
             } catch (InstantiationException e) {
                 throw new RuntimeException(e);
             }
-        }*/
+        }
 
-        @SuppressLint("MissingPermission") List<CellInfo> stations = telephonyManager.getAllCellInfo();
+        //@SuppressLint("MissingPermission")
+
+        List<CellInfo> stations = telephonyManager.getAllCellInfo();
+        Log.i(TAG, "Stations");
+        Log.i(TAG, String.valueOf(stations));
         if (stations != null) {
             for (final CellInfo station : stations) {
                 String data = System.currentTimeMillis() + " ,";
