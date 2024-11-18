@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
 
     protected LocationCallback locationCallback;
-    
+
     private LocationRequest locationRequest;
 
     private final boolean requestingLocationUpdates;
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
     private BluetoothLEScan bleScanner;
 
-    private  FormatData formatData = new FormatData();
+    private FormatData formatData = new FormatData();
 
     private BaseStationScan baseStationScan;
 
@@ -96,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,16 +105,17 @@ public class MainActivity extends AppCompatActivity {
 
         String[] permissions = {Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.BLUETOOTH_ADMIN,
                 Manifest.permission.BLUETOOTH_CONNECT,
                 Manifest.permission.BLUETOOTH_SCAN
         };
         checkPermissions(permissions);
-        
-        final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
 
-        if ( !manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
+        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             Log.i("LOCATION", "No permissions");
         } else {
             Log.i("LOCATION", "Location permissions");
@@ -138,14 +138,23 @@ public class MainActivity extends AppCompatActivity {
                 Toast.LENGTH_SHORT);
         Haptic haptic = new Haptic(vibrator);*/
 
-        this.setUpBluetoothLEscan();
-        this.startWiFiScan();
-        this.baseScanStart();
-        Toast.makeText(this, "Beginning scans", Toast.LENGTH_SHORT);
-
         // set up location
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        System.out.println(fusedLocationClient);
 
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            try {
+                ActivityCompat.requestPermissions(MainActivity.class.newInstance().getParent(),
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            } catch (InstantiationException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            Toast.makeText(this, "Location Permission failed.", Toast.LENGTH_LONG);
+        }
         fusedLocationClient.getLastLocation()
                 .addOnSuccessListener(this, new OnSuccessListener<>() {
                     @Override
@@ -155,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
                             //String data = locationDetails(location);
                             String data = formatData.formatLocation(location);
                             new FileConnection(locationFile).writeFile(data);
-                        }else {
+                        } else {
                             Log.i("LOCATION", "No Location");
                             new BluetoothLEScan(signalFile, MainActivity.this);
                         }
@@ -215,6 +224,11 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
+        this.setUpBluetoothLEscan();
+        this.startWiFiScan();
+        this.baseScanStart();
+        Toast.makeText(this, "Beginning Scans", Toast.LENGTH_LONG);
     }
 
     /**
